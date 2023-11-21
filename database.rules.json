@@ -1,0 +1,16 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "patients": {
+      ".indexOn": ["doctor", "patID"],
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "doctors": {
+      ".indexOn": ["docID"],
+      ".read": true,
+      ".write": "auth != null"
+    }
+  }
+}
