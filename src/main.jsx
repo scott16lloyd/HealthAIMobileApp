@@ -14,6 +14,7 @@ import ViewProfile from './routes/ViewProfile';
 import ViewPatientScreen from './routes/ViewPatientScreen';
 import ViewTest from './routes/ViewTest';
 import ViewTestResults from './routes/ViewTestResults';
+import GPDetailsPage from './routes/mobileRoutes/GPDetailsPage';
 
 function main() {
   return (
@@ -38,6 +39,7 @@ function main() {
               path="/viewPatientDetails/:patID/test/:testDate"
               element={<ViewTest />}
             />
+            <Route path="/mobileGPDetails" element={<GPDetailsPage />} />
           </Routes>
         </div>
       </Router>
