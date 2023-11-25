@@ -13,7 +13,9 @@ import { AuthContextProvider } from './components/auth/AuthContext';
 import ViewProfile from './routes/ViewProfile';
 import ViewPatientScreen from './routes/ViewPatientScreen';
 import ViewTest from './routes/ViewTest';
-import ViewTestResults from './routes/ViewTestResults';
+import GPDetailsPage from './routes/mobileRoutes/GPDetailsPage';
+import InsuranceDetailsPage from './routes/mobileRoutes/InsuranceDetailsPage';
+import PlanSelectionPage from './routes/mobileRoutes/PlanSelectionPage';
 
 function main() {
   return (
@@ -37,6 +39,15 @@ function main() {
             <Route
               path="/viewPatientDetails/:patID/test/:testDate"
               element={<ViewTest />}
+            />
+            <Route path="/mobileGPDetails" element={<GPDetailsPage />} />
+            <Route
+              path="/mobileInsuranceDetails"
+              element={<InsuranceDetailsPage />}
+            />
+            <Route
+              path="/mobilePlanSelection"
+              element={<PlanSelectionPage />}
             />
           </Routes>
         </div>
