@@ -1,57 +1,51 @@
 import React from 'react';
 import TopNavigationBar from '../components/widgets/TopNavigationBar/TopNavigationBar';
-import Doctor from '../images/doctorImage.png';
+import Patient from '../images/loginPatient.png';
 import { Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import PrimaryButton from '../components/widgets/PrimaryButton/PrimaryButton';
-import Footer from '../components/widgets/Footer/Footer';
 
 function LandingPage() {
   return (
     <>
       <TopNavigationBar />
+      <div>
+        <img alt="Doctor" src={Patient} style={{ width: '100%', maxWidth: '600px' }} />
+      </div>
       <div
         style={{
-          height: '100%',
-          overflow: 'hidden',
+          paddingTop: '20px',
+          width: '100%',
           display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
+          flexDirection: 'column',
+          alignItems: 'center',
         }}
       >
-        <img alt="Doctor" src={Doctor} style={{ maxHeight: '700px' }}></img>{' '}
-        {/* Adjust the maxHeight */}
         <Box
           sx={{
+            width: '90%',
+            maxWidth: '400px',
+            borderRadius: '54px 54px 0 0',
+            background: 'linear-gradient(120deg, rgba(38, 85, 255, 0.80) 26.35%, rgba(0, 117, 255, 0.60) 83.58%)',
+            boxShadow: '2px 2px 4px 0px rgba(0, 0, 0, 0.10)',
+            backdropFilter: 'blur(1.5px)',
+            padding: '1rem',
             display: 'flex',
             flexDirection: 'column',
-            width: '50%',
-            backgroundColor: '#2655FF',
-            height: '700px',
-            borderTopLeftRadius: '5rem',
-            borderBottomLeftRadius: '5rem',
             justifyContent: 'center',
             alignItems: 'center',
           }}
         >
           <Typography
             variant="h2"
-            margin="2rem"
             sx={{
               color: 'white',
-              width: '500px',
               textAlign: 'center',
+              marginBottom: '40px',
             }}
           >
-            Welcome Medical Professional
+            Welcome Patient
           </Typography>
-          <PrimaryButton
-            component={Link}
-            to="/signUp"
-            text={'Sign Up'}
-            color={'rgba(217,217,217,0.4)'}
-            state={'active'}
-          />
           <PrimaryButton
             component={Link}
             to="/login"
@@ -59,9 +53,9 @@ function LandingPage() {
             color={'rgba(217,217,217,0.4)'}
             state={'active'}
           />
+          <br></br>
         </Box>
       </div>
-      <Footer />
     </>
   );
 }
