@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import TopNavigationBar from '../components/widgets/TopNavigationBar/TopNavigationBar';
 import AlertBox from '../components/widgets/AlertBox/AlertBox';
 import { Container, Typography, Stack, TextField } from '@mui/material';
@@ -36,7 +36,6 @@ function SignInPage() {
         }
       });
   };
-
 
   useEffect(() => {
     if (user != null) {
@@ -74,30 +73,32 @@ function SignInPage() {
     backdropFilter: 'blur(1.5px)',
   };
 
+  const troubleLoggingInSectionStyle = {
+    marginTop: '20px',
+    textAlign: 'center',
+    fontFamily: 'Roboto, sans-serif',
+  };
 
   return (
     <>
-      <TopNavigationBar style={{marginBottom: '3rem'}}/>
-      <AlertBox 
+      <TopNavigationBar />
+      <AlertBox
         message={errorMessage}
         severity={'error'}
         onClose={() => setErrorMessage('')}
       />
       <Container>
-        <div
-          style={{ display: 'flex', alignItems: 'center', marginTop: '3rem' }}
-        >
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: '0.5rem' }}>
           <BackButton style={backButtonStyle} goBackPath={'/'} />
-          <Typography variant="h4" align="left">
-            Login
-          </Typography>
+          <Typography variant="h5" paddingLeft={'35px'}>Login</Typography>
           <span style={spaceStyle}></span>
-          
         </div>
         <Stack direction="row" spacing={2} justifyContent="center">
           {' '}
-          {/** Stacking textfields in 4, 4, 2 + 1 button */}
           <div style={columnStyle}>
+            <Typography fontSize={'15px'} paddingLeft={'20px'}>
+              Using your temporary password.
+            </Typography>
             <TextField
               label="Email"
               variant="filled"
@@ -109,7 +110,7 @@ function SignInPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
             <TextField
-              label="Temporary Password"
+              label="Password"
               variant="filled"
               type="password"
               style={inputStyle}
@@ -118,12 +119,13 @@ function SignInPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <PrimaryButton
-              text={'Login'}
-              type="submit"
-              action={signIn}
-              state={'active'}
-            />{' '}
+            <PrimaryButton text={'Login'} type="submit" action={signIn} state={'active'} />{' '}
+            <div style={troubleLoggingInSectionStyle}>
+              Trouble logging in?{' '}
+              <Link to="/help" style={{ textDecoration: 'underline' }}>
+                Click here.
+              </Link>
+            </div>
           </div>
         </Stack>
       </Container>

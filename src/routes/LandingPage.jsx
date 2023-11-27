@@ -41,7 +41,8 @@ function LandingPage() {
             sx={{
               color: 'white',
               textAlign: 'center',
-              marginBottom: '40px',
+              fontSize: '50px',
+              marginBottom: '20px',
             }}
           >
             Welcome Patient
