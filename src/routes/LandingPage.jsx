@@ -53,7 +53,6 @@ function LandingPage() {
             color={'rgba(217,217,217,0.4)'}
             state={'active'}
           />
-          <br></br>
         </Box>
       </div>
     </>
