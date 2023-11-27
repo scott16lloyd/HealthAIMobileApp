@@ -7,7 +7,6 @@ import AlertBox from '../components/widgets/AlertBox/AlertBox';
 import { Container, Typography, Stack, TextField } from '@mui/material';
 import BackButton from '../components/widgets/BackButton/BackButton';
 import PrimaryButton from '../components/widgets/PrimaryButton/PrimaryButton';
-import SocialMediaSignInButton from '../components/widgets/SocialMediaSignInButton/SocialMediaSignInButton';
 import { UserAuth } from '../components/auth/AuthContext';
 
 function SignInPage() {
@@ -15,7 +14,7 @@ function SignInPage() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState('');
-  const { googleSignIn, user } = UserAuth();
+  const { user } = UserAuth();
 
   const signIn = (e) => {
     e.preventDefault();
@@ -38,13 +37,6 @@ function SignInPage() {
       });
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      await googleSignIn();
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   useEffect(() => {
     if (user != null) {
@@ -82,33 +74,25 @@ function SignInPage() {
     backdropFilter: 'blur(1.5px)',
   };
 
-  const socialButtonContainerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-  };
 
   return (
     <>
-      <TopNavigationBar />
-      <AlertBox
+      <TopNavigationBar style={{marginBottom: '3rem'}}/>
+      <AlertBox 
         message={errorMessage}
         severity={'error'}
         onClose={() => setErrorMessage('')}
       />
       <Container>
         <div
-          style={{ display: 'flex', alignItems: 'center', marginTop: '1rem' }}
+          style={{ display: 'flex', alignItems: 'center', marginTop: '3rem' }}
         >
           <BackButton style={backButtonStyle} goBackPath={'/'} />
           <Typography variant="h4" align="left">
             Login
           </Typography>
           <span style={spaceStyle}></span>
-          <Typography variant="h7" align="left" style={mandatoryStyle}>
-            Mandatory *
-          </Typography>
+          
         </div>
         <Stack direction="row" spacing={2} justifyContent="center">
           {' '}
@@ -125,7 +109,7 @@ function SignInPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
             <TextField
-              label="Password"
+              label="Temporary Password"
               variant="filled"
               type="password"
               style={inputStyle}
@@ -142,12 +126,6 @@ function SignInPage() {
             />{' '}
           </div>
         </Stack>
-        <div style={socialButtonContainerStyle}>
-          <SocialMediaSignInButton
-            socialPlatform={'google'}
-            action={handleGoogleSignIn}
-          />
-        </div>
       </Container>
     </>
   );

@@ -1,9 +1,8 @@
 import React from 'react';
-import Box from '@mui/material/Box';
-import { Button, Typography } from '@mui/material';
+import { Button, Typography, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-function TopNavigationBar({ aboutNav, helpNav }) {
+function TopNavigationBar() {
   const healthAIStyle = {
     color: '#000',
     fontFamily: 'Roboto, sans-serif',
@@ -19,21 +18,20 @@ function TopNavigationBar({ aboutNav, helpNav }) {
     fontSize: '20px',
     fontStyle: 'normal',
     fontWeight: 500,
-    textAlign: 'left',
-    paddingLeft: '5px',
     lineHeight: 'normal',
   };
 
   return (
     <Box
       sx={{
+        paddingTop: '0.5rem', 
+        paddingBottom: '0.5rem', 
         width: '100%',
-        height: '100px',
         display: 'flex',
-        flexDirection: 'column', 
-        marginTop: '30px',
-        alignItems: 'center', 
-        justifyContent: 'center', 
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white', 
       }}
     >
       <Button
@@ -47,7 +45,7 @@ function TopNavigationBar({ aboutNav, helpNav }) {
         }}
         component={Link}
         to="/home"
-        style={{ textAlign: 'center' }} 
+        style={{ textAlign: 'center' }}
       >
         <Box>
           <Typography variant="h1" style={healthAIStyle}>
