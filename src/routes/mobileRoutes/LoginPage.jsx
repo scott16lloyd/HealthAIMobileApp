@@ -8,6 +8,7 @@ import { Container, Typography, Stack, TextField } from '@mui/material';
 import BackButton from '../components/widgets/BackButton/BackButton';
 import PrimaryButton from '../components/widgets/PrimaryButton/PrimaryButton';
 import { UserAuth } from '../components/auth/AuthContext';
+import InsuranceDropdown from '../components/widgets/Dropdown/InsuranceDropdown';
 
 function SignInPage() {
   const [email, setEmail] = useState('');
@@ -125,10 +126,12 @@ function SignInPage() {
               <Link to="/help" style={{ textDecoration: 'underline' }}>
                 Click here.
               </Link>
+              <InsuranceDropdown />
             </div>
           </div>
         </Stack>
       </Container>
+
     </>
   );
 }
