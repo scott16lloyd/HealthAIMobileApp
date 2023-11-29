@@ -1,9 +1,9 @@
 import React from 'react';
-import TopNavigationBar from '../components/widgets/TopNavigationBar/TopNavigationBar';
-import Patient from '../images/loginPatient.png';
+import TopNavigationBar from '../../components/widgets/TopNavigationBar/TopNavigationBar';
+import Patient from '../../images/loginPatient.png'
 import { Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import PrimaryButton from '../components/widgets/PrimaryButton/PrimaryButton';
+import PrimaryButton from '../../components/widgets/PrimaryButton/PrimaryButton';
 
 function LandingPage() {
   return (
@@ -25,6 +25,7 @@ function LandingPage() {
           sx={{
             width: '90%',
             maxWidth: '400px',
+            height: '100%',
             borderRadius: '54px 54px 0 0',
             background: 'linear-gradient(120deg, rgba(38, 85, 255, 0.80) 26.35%, rgba(0, 117, 255, 0.60) 83.58%)',
             boxShadow: '2px 2px 4px 0px rgba(0, 0, 0, 0.10)',
@@ -55,6 +56,9 @@ function LandingPage() {
             state={'active'}
           />
         </Box>
+      </div>
+      <div>
+        
       </div>
     </>
   );
