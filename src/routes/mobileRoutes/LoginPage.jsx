@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { auth } from '../firebase';
+import { auth } from '../../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
-import TopNavigationBar from '../components/widgets/TopNavigationBar/TopNavigationBar';
-import AlertBox from '../components/widgets/AlertBox/AlertBox';
+import TopNavigationBar from '../../components/widgets/TopNavigationBar/TopNavigationBar';
+import AlertBox from '../../components/widgets/AlertBox/AlertBox';
 import { Container, Typography, Stack, TextField } from '@mui/material';
-import BackButton from '../components/widgets/BackButton/BackButton';
-import PrimaryButton from '../components/widgets/PrimaryButton/PrimaryButton';
-import { UserAuth } from '../components/auth/AuthContext';
-import InsuranceDropdown from '../components/widgets/Dropdown/InsuranceDropdown';
+import BackButton from '../../components/widgets/BackButton/BackButton';
+import PrimaryButton from '../../components/widgets/PrimaryButton/PrimaryButton';
+import { UserAuth } from '../../components/auth/AuthContext';
+
 
 function SignInPage() {
   const [email, setEmail] = useState('');
@@ -126,7 +126,6 @@ function SignInPage() {
               <Link to="/help" style={{ textDecoration: 'underline' }}>
                 Click here.
               </Link>
-              <InsuranceDropdown />
             </div>
           </div>
         </Stack>

@@ -1,11 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './routes/Home';
-import LandingPage from './routes/LandingPage';
+import LandingPage from './routes/mobileRoutes/LandingPage';
 import DocBotPage from './routes/DocBotPage';
 import HelpPage from './routes/HelpPage';
 import About from './routes/About';
-import LoginPage from './routes/LoginPage';
+import LoginPage from './routes/mobileRoutes/LoginPage';
 import PatientDetails from './routes/PatientDetails';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { AuthContextProvider } from './components/auth/AuthContext';
