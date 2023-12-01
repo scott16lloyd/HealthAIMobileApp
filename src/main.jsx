@@ -16,6 +16,7 @@ import ViewTest from './routes/ViewTest';
 import GPDetailsPage from './routes/mobileRoutes/GPDetailsPage';
 import InsuranceDetailsPage from './routes/mobileRoutes/InsuranceDetailsPage';
 import PlanSelectionPage from './routes/mobileRoutes/PlanSelectionPage';
+import Checkout from './routes/mobileRoutes/checkout';
 
 function main() {
   return (
@@ -49,6 +50,7 @@ function main() {
               path="/mobilePlanSelection"
               element={<PlanSelectionPage />}
             />
+            <Route path="/checkout" element={<Checkout />} />
           </Routes>
         </div>
       </Router>
