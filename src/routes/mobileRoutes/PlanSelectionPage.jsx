@@ -4,6 +4,8 @@ import TitleText from '../../components/widgets/TitleText/TitleText';
 import BackButton from '../../components/widgets/BackButton/BackButton';
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
 import CheckIcon from '@mui/icons-material/Check';
+import PrimaryButton from '../../components/widgets/PrimaryButton/PrimaryButton';
+import { useNavigate } from 'react-router-dom';
 
 function PlanSelectionPage() {
   const wrapperStyle = {
@@ -56,6 +58,8 @@ function PlanSelectionPage() {
     gap: '0.5rem',
   };
 
+  const navigate = useNavigate();
+
   return (
     <>
       <div style={wrapperStyle}>
@@ -87,6 +91,13 @@ function PlanSelectionPage() {
                   <CheckIcon />
                   <Typography variant="subtitle1">Food Plans</Typography>
                 </div>
+              </div>
+              <div style={{ paddingTop: '2rem' }}>
+                <PrimaryButton
+                  text={'Checkout'}
+                  state={'unactive'}
+                  action={navigate('/checkout')}
+                />
               </div>
             </div>
           </Paper>
