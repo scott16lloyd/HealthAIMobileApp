@@ -1,94 +1,39 @@
 import React, { useState } from 'react';
-import { UserAuth } from '../components/auth/AuthContext';
-import TopNavigationBar from '../components/widgets/TopNavigationBar/TopNavigationBar';
-import PrimaryButton from '../components/widgets/PrimaryButton/PrimaryButton';
-import ViewAllPatients from './ViewAllPatients';
-import AddPatient from './AddPatient';
-import { useNavigate } from 'react-router-dom';
-import Footer from '../components/widgets/Footer/Footer';
+import BottomNavigation from '@mui/material/BottomNavigation';
+import BottomNavigationAction from '@mui/material/BottomNavigationAction';
+import HomeIcon from '@mui/icons-material/Home';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ChatIcon from '@mui/icons-material/Chat';
 import UserProfile from '../components/widgets/UserProfile/UserProfile';
 
-function Home() {
-  // Manage state of button, including default state
-  const [buttonStates, setButtonStates] = useState({
-    viewPatients: 'active',
-    addPatient: 'unactive',
-    viewProfile: 'unactive',
-  });
+function ResponsiveBottomNav() {
+  const [value, setValue] = useState(0);
 
-  const navigate = useNavigate();
-
-  const handleButtonClick = (buttonKey) => {
-    const newButtonStates = {
-      viewPatients: 'unactive',
-      addPatient: 'unactive',
-      viewProfile: 'unactive',
-      [buttonKey]: 'active',
-    };
-    setButtonStates(newButtonStates);
+  const iconStyle = {
+    // Adjust the size of the icon as needed
+    width: '10px', 
+    height: '10px'
   };
-
-  const buttonColumnStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '80%',
-    gap: '1rem',
-    margin: '2rem',
-  };
-
-  const outerWrapperStyle = {
-    display: 'flex',
-    flexDirection: 'row',
-    marginBottom: '9rem',
-  };
-
-  const displayContainer = {
-    width: '75%',
-    paddingLeft: '4rem',
-    paddingRight: '4rem',
-    paddingTop: '1rem',
-  };
-
-  const topBarWrapper = {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingRight: '2rem',
-  };
-
-  // Define user related objects
-  const { user } = UserAuth();
-  console.log(user.displayName);
 
   return (
-    <>
-      <div style={topBarWrapper}>
-        <TopNavigationBar />
-        {user ? <UserProfile /> : null}
-      </div>
-      <div style={outerWrapperStyle}>
-        <div style={buttonColumnStyle}>
-          <PrimaryButton
-            text={'View Patients'}
-            state={buttonStates.viewPatients}
-            action={() => handleButtonClick('viewPatients')}
-          />
-          <PrimaryButton
-            text={'Add Patient'}
-            state={buttonStates.addPatient}
-            action={() => handleButtonClick('addPatient')}
-          />
-          <PrimaryButton text={'View Profile'} to={'/viewProfile'} />
-        </div>
-        <div style={displayContainer}>
-          {buttonStates.viewPatients === 'active' && <ViewAllPatients />}
-          {buttonStates.addPatient === 'active' && <AddPatient />}
-        </div>
-      </div>
-      <Footer />
-      <div></div>
-    </>
+    <BottomNavigation
+      value={value}
+      onChange={(event, newValue) => {
+        setValue(newValue);
+      }}
+      style={{
+        width: '100%',
+        position: 'fixed',
+        bottom: 0,
+        zIndex: 1000, // To ensure it stays on top of other elements
+      }}
+    >
+      <BottomNavigationAction label="Home" icon={<HomeIcon />} />
+      <BottomNavigationAction label="Test" icon={<CheckCircleIcon />} />
+      <BottomNavigationAction label="Chat" icon={<ChatIcon />} />
+      <BottomNavigationAction label="Profile" icon={<UserProfile style={iconStyle}/>} />
+    </BottomNavigation>
   );
 }
-export default Home;
+
+export default ResponsiveBottomNav;

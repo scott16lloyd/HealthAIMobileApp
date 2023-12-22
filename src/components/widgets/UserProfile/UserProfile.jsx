@@ -71,9 +71,9 @@ function UserProfile() {
   };
 
   const avatarStyling = {
-    height: '80px',
-    width: '80px',
-    fontSize: '2rem',
+    height: '40px',
+    width: '40px',
+    fontSize: '0.5rem',
     boxShadow: '2px 2px 4px 0px rgba(0, 0, 0, 0.10)',
     backdropFilter: 'blur(1.5px)',
   };
@@ -82,9 +82,9 @@ function UserProfile() {
       <Tooltip>
         <Avatar
           style={{
-            height: '80px',
-            width: '80px',
-            fontSize: '2rem',
+            height: '42px',
+            width: '42px',
+            fontSize: '1.3rem',
             cursor: 'pointer',
           }}
           sx={avatarStyling}
