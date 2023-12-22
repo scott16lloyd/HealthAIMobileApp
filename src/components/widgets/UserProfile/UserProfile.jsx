@@ -71,20 +71,20 @@ function UserProfile() {
   };
 
   const avatarStyling = {
-    height: '40px',
-    width: '40px',
-    fontSize: '0.5rem',
+    height: '80px',
+    width: '80px',
+    fontSize: '2rem',
     boxShadow: '2px 2px 4px 0px rgba(0, 0, 0, 0.10)',
     backdropFilter: 'blur(1.5px)',
   };
   return (
-    <div style={{ display: 'flex', margin: '2rem' }}>
+    <div style={{ display: 'flex', paddingBottom: '10px' }}>
       <Tooltip>
         <Avatar
           style={{
-            height: '42px',
-            width: '42px',
-            fontSize: '1.3rem',
+            height: '60px',
+            width: '60px',
+            fontSize: '1.5rem',
             cursor: 'pointer',
           }}
           sx={avatarStyling}
