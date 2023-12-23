@@ -17,7 +17,7 @@ openai.api_key = api_key
 def start_conversation():
     try:
         # Starting the conversation
-        return jsonify({"message": "Welcome to the Doc-Bot Chat! Please message here. DISCLAIMER: This is an artifical intelligence chat-bot, not professional advice. Seek a professional for relative medical advice."})
+        return jsonify({"message": "Hello, I am the DocBot. Ask me a question or tell me a symptom and I will try my best to recommend a solution."})
     except Exception as e:
         return jsonify({"error": str(e)})
 
