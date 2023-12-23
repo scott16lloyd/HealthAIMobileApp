@@ -10,13 +10,13 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
-import Typography from '@mui/material/Typography';
 import PaymentForm from './PaymentForm';
-import Review from './Review';
+import ReviewPayment from './ReviewPayment';
 import { useNavigate } from 'react-router-dom';
 import { database } from '../../firebase';
 import { UserAuth } from '../../components/auth/AuthContext';
 import { ref, get, update } from 'firebase/database';
+import { Typography } from '@mui/material';
 
 function Copyright() {
   return (
@@ -38,7 +38,7 @@ function getStepContent(step) {
     case 0:
       return <PaymentForm />;
     case 1:
-      return <Review />;
+      return <ReviewPayment />;
     default:
       throw new Error('Unknown step');
   }

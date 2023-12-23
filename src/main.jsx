@@ -17,6 +17,7 @@ import GPDetailsPage from './routes/mobileRoutes/GPDetailsPage';
 import InsuranceDetailsPage from './routes/mobileRoutes/InsuranceDetailsPage';
 import PlanSelectionPage from './routes/mobileRoutes/PlanSelectionPage';
 import Checkout from './routes/mobileRoutes/checkout';
+import ReviewPage from './routes/mobileRoutes/ReviewPage';
 
 function main() {
   return (
@@ -51,6 +52,7 @@ function main() {
               element={<PlanSelectionPage />}
             />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/mobileReview" element={<ReviewPage />} />
           </Routes>
         </div>
       </Router>
