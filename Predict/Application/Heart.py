@@ -2,9 +2,12 @@ import pyrebase
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
+import os
+
+api_key = os.getenv('REACT_APP_CHATBOT_KEY')
 
 config = {
-  "apiKey": "AIzaSyAHFVjJjJeM_Soz2lsJOEIwSBiLWOS_RY0",
+  "apiKey": api_key,
   "authDomain": "healthai-40b47.firebaseapp.com",
   "databaseURL": "https://healthai-40b47-default-rtdb.europe-west1.firebasedatabase.app",
   "projectId": "healthai-40b47",

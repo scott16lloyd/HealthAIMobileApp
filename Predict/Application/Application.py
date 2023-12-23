@@ -2,8 +2,10 @@ import os
 import pandas as pd
 import numpy as np
 import firebase_admin
-from firebase_admin import credentials, db
+from firebase_admin import credentials, db, auth
 import random
+import requests
+import datetime
 
 random_seed = 42  
 random.seed(random_seed)
@@ -27,6 +29,9 @@ firebase_admin.initialize_app(cred, {
     "databaseURL": "https://healthai-40b47-default-rtdb.europe-west1.firebasedatabase.app"}
     )
 
+
+
+
 def fetch_patient_data(patient_id):
     try:
         #Get the patient entity
@@ -49,6 +54,9 @@ def fetch_patient_data(patient_id):
     except Exception as e:
         print(f"Error fetching patient data: {e}")
         return None
+    
+
+
 
 def generate_single_patient_data(model_type, user_uuid):
     #Fetch user data from patients table using UUID
@@ -137,10 +145,25 @@ def generate_single_patient_data(model_type, user_uuid):
         raise ValueError(f"Invalid model_type: {model_type}")
 
     
-    
-if __name__ == "__main__":
-    user_uuid = "al5gO6mkgdZWlR9XqtdMInLHwvl2"
 
+def add_predict_info_to_firebase(predict_info, uid):
+
+    current_date = datetime.datetime.now().strftime("%d-%m-%Y")
+ 
+    # Get a reference to the 'patients' node in the Firebase Realtime Database
+    patients_ref = db.reference(f'patients/{uid}/testResults/{current_date}')
+
+    # Update the prediction results under the specified UID within the 'patients' node
+    patients_ref.update(predict_info)
+
+
+
+if __name__ == "__main__":
+   
+    current_user = auth.current_user()
+    user_uuid = current_user.uid
+
+    
     #Generate patient data for colon model
     single_patient_data_colon = generate_single_patient_data('colon', user_uuid)
 
@@ -151,9 +174,7 @@ if __name__ == "__main__":
     print(pd.DataFrame([single_patient_data_colon]))
 
     #Predict colon cancer
-    colon_result, colon_probability = Colon.predict_colon_cancer(
-        pd.DataFrame([single_patient_data_colon]), colon_model, colon_imputer, GENDER_MAPPING, train_columns_colon
-    )
+    colon_result, colon_probability = Colon.predict_colon_cancer(pd.DataFrame([single_patient_data_colon]), colon_model, colon_imputer, GENDER_MAPPING, train_columns_colon)
 
     #Print results with risk percentage
     print("\nColon Cancer Data:")
@@ -170,9 +191,7 @@ if __name__ == "__main__":
     print(pd.DataFrame([single_patient_data_heart]))
 
     #Predict heart disease
-    heart_result, heart_probability = Heart.predict_heart_disease(
-        pd.DataFrame([single_patient_data_heart]), heart_model, heart_imputer, GENDER_MAPPING, train_columns_heart
-    )
+    heart_result, heart_probability = Heart.predict_heart_disease(pd.DataFrame([single_patient_data_heart]), heart_model, heart_imputer, GENDER_MAPPING, train_columns_heart)
 
     #Print results with risk percentage
     print("\nHeart Disease Data:")
@@ -188,11 +207,22 @@ if __name__ == "__main__":
     print(pd.DataFrame([single_patient_data_lung]))
 
     #Predict lung cancer
-    lung_result, lung_probability = Lung.predict_lung_cancer(
-        pd.DataFrame([single_patient_data_lung]), lung_model, lung_imputer, GENDER_MAPPING
-    )
+    lung_result, lung_probability = Lung.predict_lung_cancer(pd.DataFrame([single_patient_data_lung]), lung_model, lung_imputer, GENDER_MAPPING)
 
     #Print results with risk percentage
     print("\nLung Cancer Data:")
     #print("Lung Result (Probability of Positive Class):", lung_result[0])
     print("Lung Risk Percentage:", int(lung_probability[0] * 100))
+
+
+    # Create a dictionary with prediction results
+    predict_info = {
+        'colonResult': int(colon_probability[0] * 100),
+        'heartResult': int(heart_probability[0] * 100),
+        'lungResult': int(lung_probability[0] * 100)
+    }
+
+    # Update the Firebase database with the prediction results
+    add_predict_info_to_firebase(predict_info, user_uuid)
+
+    
