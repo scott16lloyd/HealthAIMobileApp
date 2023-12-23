@@ -34,30 +34,26 @@ function MainPage() {
     "Have you been experiencing bowel problems?",
     "Have you experienced any rectal bleeding?",
   ];
-
   const handleAnswerChange = (question, event) => {
-    // Update the answers state as the user selects options
     setAnswers({ ...answers, [question]: event.target.value });
   };
 
   const handleSubmit = async () => {
-    // Prepare the data to be sent to the database
-    const resultsData = {
-      answers, // Store the answers in the database
-      // Add any other data you want to save
-    };
-
-    // Reference to the user's test history
+    if (!user || !user.uid) {
+      console.error('User not authenticated');
+      return;
+    }
+  
     const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
-
+  
     try {
-      // Send the results data to the database
-      await set(testHistoryRef, resultsData);
+      await set(testHistoryRef, { answers });
       console.log('Test results submitted successfully');
     } catch (error) {
       console.error('Failed to submit test results:', error);
     }
   };
+  
 
   const renderContent = () => {
     switch (value) {
@@ -99,7 +95,8 @@ function MainPage() {
         return (
           <>
             <UserProfile username={user ? user.displayName : 'Guest'} />
-            <ViewProfile />
+            <ViewProfile uid={user?.uid} />
+
           </>
         );
 
