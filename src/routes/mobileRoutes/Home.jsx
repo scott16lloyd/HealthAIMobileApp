@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   FormControl,
@@ -7,32 +7,33 @@ import {
   Radio,
   Button,
   Box,
+  ListItem,
 } from '@mui/material';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import HomeIcon from '@mui/icons-material/Home';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RateReviewIcon from '@mui/icons-material/RateReview'; 
+import RateReviewIcon from '@mui/icons-material/RateReview';
 import ChatIcon from '@mui/icons-material/Chat';
 import PersonIcon from '@mui/icons-material/Person';
 import UserProfile from '../../components/widgets/UserProfile/UserProfile';
 import { UserAuth } from '../../components/auth/AuthContext';
 import PrimaryButton from '../../components/widgets/PrimaryButton/PrimaryButton';
-import ViewProfile from './ViewProfile'; 
+import ViewProfile from './ViewProfile';
 import { database } from '../../firebase';
-import { ref, set } from 'firebase/database';
+import { ref, set, get } from 'firebase/database';
 import ReviewPage from './ReviewPage';
-
+import TestHistoryWidget from '../../components/widgets/TestHistoryWidget/TestHistoryWidget';
 
 function MainPage() {
   const [value, setValue] = useState('home');
   const { user } = UserAuth();
-  const [answers, setAnswers] = useState({}); 
+  const [answers, setAnswers] = useState({});
+  const [testHistory, setTestHistory] = useState([]); 
 
   const iconStyles = {
-    fontSize: '35px', 
+    fontSize: '35px',
   };
-  
   const questions = [
     "Do you smoke regularly?",
     "Do you consume alcohol often?",
@@ -49,6 +50,32 @@ function MainPage() {
     "Have you been experiencing bowel problems?",
     "Have you experienced any rectal bleeding?",
   ];
+
+  useEffect(() => {
+ 
+    if (user && user.uid) {
+      const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
+  
+      get(testHistoryRef)
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            const testHistoryData = snapshot.val();
+            if (testHistoryData && typeof testHistoryData === 'object') {
+             
+              const testHistoryArray = Object.values(testHistoryData);
+
+              setTestHistory(testHistoryArray);
+            } else {
+              console.error('Test history data is not in the expected format:', testHistoryData);
+            }
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching test history:', error);
+        });
+    }
+  }, [user]);
+  
 
   const handleAnswerChange = (question, event) => {
     setAnswers({ ...answers, [question]: event.target.value });
@@ -102,11 +129,42 @@ function MainPage() {
             <Typography variant="h6" gutterBottom>
               Hello, {user ? user.displayName : 'Guest'}
             </Typography>
-            <Typography variant="subtitle1">
-              How are you feeling today?
-            </Typography>
+            <Typography variant="subtitle1">How are you feeling today?</Typography>
+            <Box display="flex" justifyContent="center" mt={3}>
+              <Button
+                variant="contained"
+                color="primary"
+                style={{ marginRight: '16px' }}
+                onClick={() => {
+      
+                  console.log('Contact Insurance button clicked');
+                }}
+              >
+                Contact Insurance
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+      
+                  console.log('Contact GP button clicked');
+                }}
+              >
+                Contact GP
+              </Button>
+            </Box> <br></br>
+            {Array.isArray(testHistory) ? (
+              testHistory.map((testData, index) => (
+                <Box key={index} mb={2}>
+                <TestHistoryWidget key={index} date={testData.date} />
+                </Box>
+              ))
+            ) : (
+              <Typography variant="subtitle1">Test history data is not available.</Typography>
+            )}
           </>
         );
+  
   
       case 'test':
         return (
