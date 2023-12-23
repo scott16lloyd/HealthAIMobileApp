@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Typography, FormControl, FormControlLabel, RadioGroup, Radio } from '@mui/material';
+import { Typography, FormControl, FormControlLabel, RadioGroup, Radio, Button, Box } from '@mui/material';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import HomeIcon from '@mui/icons-material/Home';
@@ -8,10 +8,15 @@ import ChatIcon from '@mui/icons-material/Chat';
 import PersonIcon from '@mui/icons-material/Person';
 import UserProfile from '../components/widgets/UserProfile/UserProfile';
 import { UserAuth } from '../components/auth/AuthContext';
+import PrimaryButton from '../components/widgets/PrimaryButton/PrimaryButton';
+import ViewProfile from './ViewProfile';
+import { database } from '../firebase';
+import { ref, set } from 'firebase/database';
 
 function MainPage() {
   const [value, setValue] = useState('home');
   const { user } = UserAuth();
+  const [answers, setAnswers] = useState({}); // Store the test answers
 
   const questions = [
     "Do you smoke regularly?",
@@ -30,10 +35,28 @@ function MainPage() {
     "Have you experienced any rectal bleeding?",
   ];
 
-  const [answers, setAnswers] = useState({});
-
   const handleAnswerChange = (question, event) => {
+    // Update the answers state as the user selects options
     setAnswers({ ...answers, [question]: event.target.value });
+  };
+
+  const handleSubmit = async () => {
+    // Prepare the data to be sent to the database
+    const resultsData = {
+      answers, // Store the answers in the database
+      // Add any other data you want to save
+    };
+
+    // Reference to the user's test history
+    const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
+
+    try {
+      // Send the results data to the database
+      await set(testHistoryRef, resultsData);
+      console.log('Test results submitted successfully');
+    } catch (error) {
+      console.error('Failed to submit test results:', error);
+    }
   };
 
   const renderContent = () => {
@@ -46,25 +69,40 @@ function MainPage() {
             <Typography variant="subtitle1">How are you feeling today?</Typography>
           </>
         );
+
       case 'test':
         return (
           <div>
-            <Typography variant="h4" gutterBottom>Health Questions</Typography>
+            <Typography variant="h5" gutterBottom>Predict Your Health Results</Typography>
+            <Typography variant="h6" color={'#268AFF'} gutterBottom>
+              Answer these questions to get a prediction about your risk for colon cancer, lung cancer, and heart disease.
+            </Typography>
             {questions.map((question, index) => (
               <FormControl key={index} component="fieldset">
-                <Typography variant="h6">{question}</Typography>
+                <Typography variant="subtitle1">{question}</Typography>
                 <RadioGroup row onChange={(event) => handleAnswerChange(question, event)}>
                   <FormControlLabel value="yes" control={<Radio />} label="Yes" />
                   <FormControlLabel value="no" control={<Radio />} label="No" />
                 </RadioGroup>
               </FormControl>
             ))}
+            <Box display="flex" justifyContent="center" mb={3}>
+              <PrimaryButton text={'Submit Test'} onClick={handleSubmit} state={'active'} />
+            </Box>
           </div>
         );
+
       case 'chat':
         return <Typography variant="h4">Chat Content</Typography>;
+
       case 'profile':
-        return <Typography variant="h4">Profile Content</Typography>;
+        return (
+          <>
+            <UserProfile username={user ? user.displayName : 'Guest'} />
+            <ViewProfile />
+          </>
+        );
+
       default:
         return <Typography variant="h4">Page not found</Typography>;
     }
