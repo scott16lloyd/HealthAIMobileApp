@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import openai
+import os
 
 app = Flask(__name__)
 CORS(app)  # Initialize CORS to communicate backend to frontend
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Connecting to ChatGPT with API Key
-api_key = "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"
+api_key = os.getenv('REACT_APP_CHATBOT_KEY')
 openai.api_key = api_key
 
 
@@ -16,7 +17,7 @@ openai.api_key = api_key
 def start_conversation():
     try:
         # Starting the conversation
-        return jsonify({"message": "Welcome to the Doc-Bot Chat! Please message here."})
+        return jsonify({"message": "Hello, I am the DocBot. Ask me a question or tell me a symptom and I will try my best to recommend a solution."})
     except Exception as e:
         return jsonify({"error": str(e)})
 
@@ -29,7 +30,7 @@ def post_message():
         user_input = request.json['user_input']
 
         # Defining context for the API to instruct ChatGPT on its directive to the user
-        system_message = "You are a medical chatbot to predict specifically heart disease, lung cancer, and colon cancer. If you are asked anything unrelated to these topics, please advise the user that this is not your specialty. Please ask questions to determine the risk of these illnesses on a given patient and provide information on disease risk and treatment. Please dont give yourself any prefixes when sending a response"
+        system_message = "You are a medical chatbot to help predict specifically heart disease, lung cancer, and colon cancer. Please ask questions to determine the risk of these illnesses on a given patient and provide information on disease risk and treatment. Please dont give yourself any prefixes when sending a response"
 
         # Send a prompt to GPT
         prompt = f"{system_message}\{user_input}\n" 
