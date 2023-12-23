@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Box, CircularProgress, List, ListItem, Paper, Divider } from '@mui/material';
 import { getDatabase, ref, get } from 'firebase/database';
-import { UserAuth } from '../components/auth/AuthContext';
+import { UserAuth } from '../../components/auth/AuthContext';
 
 function ViewProfile() {
   const [isLoading, setIsLoading] = useState(true);

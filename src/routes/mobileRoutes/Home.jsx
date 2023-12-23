@@ -15,25 +15,24 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RateReviewIcon from '@mui/icons-material/RateReview'; 
 import ChatIcon from '@mui/icons-material/Chat';
 import PersonIcon from '@mui/icons-material/Person';
-import UserProfile from '../components/widgets/UserProfile/UserProfile';
-import { UserAuth } from '../components/auth/AuthContext';
-import PrimaryButton from '../components/widgets/PrimaryButton/PrimaryButton';
-import ViewProfile from './ViewProfile'; // Ensure only one import statement for ViewProfile
-import { database } from '../firebase';
+import UserProfile from '../../components/widgets/UserProfile/UserProfile';
+import { UserAuth } from '../../components/auth/AuthContext';
+import PrimaryButton from '../../components/widgets/PrimaryButton/PrimaryButton';
+import ViewProfile from './ViewProfile'; 
+import { database } from '../../firebase';
 import { ref, set } from 'firebase/database';
-import ReviewPage from './mobileRoutes/ReviewPage';
+import ReviewPage from './ReviewPage';
 
 
 function MainPage() {
   const [value, setValue] = useState('home');
   const { user } = UserAuth();
-  const [answers, setAnswers] = useState({}); // Store the test answers
+  const [answers, setAnswers] = useState({}); 
 
   const iconStyles = {
-    fontSize: '35px', // Adjust the size as needed
+    fontSize: '35px', 
   };
   
-
   const questions = [
     "Do you smoke regularly?",
     "Do you consume alcohol often?",
@@ -145,7 +144,6 @@ function MainPage() {
       case 'review':
         return (
           <>
-            {/* Content for the Review page */}
             <ReviewPage />
           </>
         );
@@ -176,27 +174,27 @@ function MainPage() {
          <BottomNavigationAction
           label="Home"
           value="home"
-          icon={<HomeIcon style={iconStyles} />} // Apply custom CSS style
+          icon={<HomeIcon style={iconStyles} />} 
         />
         <BottomNavigationAction
           label="Test"
           value="test"
-          icon={<CheckCircleIcon style={iconStyles} />} // Apply custom CSS style
+          icon={<CheckCircleIcon style={iconStyles} />} 
         />
         <BottomNavigationAction
           label="Chat"
           value="chat"
-          icon={<ChatIcon style={iconStyles} />} // Apply custom CSS style
+          icon={<ChatIcon style={iconStyles} />} 
         />
         <BottomNavigationAction
           label="Review"
           value="review"
-          icon={<RateReviewIcon style={iconStyles} />} // Apply custom CSS style
+          icon={<RateReviewIcon style={iconStyles} />} 
         />
         <BottomNavigationAction
           label="Profile"
           value="profile"
-          icon={<PersonIcon style={iconStyles} />} // Apply custom CSS style
+          icon={<PersonIcon style={iconStyles} />} 
         />
       </BottomNavigation>
     </>
