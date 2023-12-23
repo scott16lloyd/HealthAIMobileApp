@@ -2,7 +2,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { getDatabase, ref, push } from 'firebase/database';
+import { getDatabase, ref, push, set } from 'firebase/database';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -40,4 +40,4 @@ const signInWithGoogle = () => {
     });
 };
 
-export { auth, signInWithGoogle, database, ref, push }; // Export the auth object
+export { auth, signInWithGoogle, database, ref, push, set }; // Export the auth object
