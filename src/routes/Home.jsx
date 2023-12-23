@@ -12,19 +12,27 @@ import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import HomeIcon from '@mui/icons-material/Home';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RateReviewIcon from '@mui/icons-material/RateReview'; 
 import ChatIcon from '@mui/icons-material/Chat';
 import PersonIcon from '@mui/icons-material/Person';
 import UserProfile from '../components/widgets/UserProfile/UserProfile';
 import { UserAuth } from '../components/auth/AuthContext';
 import PrimaryButton from '../components/widgets/PrimaryButton/PrimaryButton';
-import ViewProfile from './ViewProfile';
+import ViewProfile from './ViewProfile'; // Ensure only one import statement for ViewProfile
 import { database } from '../firebase';
 import { ref, set } from 'firebase/database';
+import ReviewPage from './mobileRoutes/ReviewPage';
+
 
 function MainPage() {
   const [value, setValue] = useState('home');
   const { user } = UserAuth();
   const [answers, setAnswers] = useState({}); // Store the test answers
+
+  const iconStyles = {
+    fontSize: '35px', // Adjust the size as needed
+  };
+  
 
   const questions = [
     "Do you smoke regularly?",
@@ -100,7 +108,7 @@ function MainPage() {
             </Typography>
           </>
         );
-
+  
       case 'test':
         return (
           <div>
@@ -122,10 +130,10 @@ function MainPage() {
             </Box>
           </div>
         );
-
+  
       case 'chat':
         return <Typography variant="h4">Chat Content</Typography>;
-
+  
       case 'profile':
         return (
           <>
@@ -133,11 +141,20 @@ function MainPage() {
             <ViewProfile uid={user?.uid} />
           </>
         );
-
+  
+      case 'review':
+        return (
+          <>
+            {/* Content for the Review page */}
+            <ReviewPage />
+          </>
+        );
+  
       default:
         return <Typography variant="h4">Page not found</Typography>;
     }
   };
+  
 
   return (
     <>
@@ -153,12 +170,34 @@ function MainPage() {
           position: 'fixed',
           bottom: 0,
           zIndex: 1000,
+        
         }}
       >
-        <BottomNavigationAction label="Home" value="home" icon={<HomeIcon />} />
-        <BottomNavigationAction label="Test" value="test" icon={<CheckCircleIcon />} />
-        <BottomNavigationAction label="Chat" value="chat" icon={<ChatIcon />} />
-        <BottomNavigationAction label="Profile" value="profile" icon={<PersonIcon />} />
+         <BottomNavigationAction
+          label="Home"
+          value="home"
+          icon={<HomeIcon style={iconStyles} />} // Apply custom CSS style
+        />
+        <BottomNavigationAction
+          label="Test"
+          value="test"
+          icon={<CheckCircleIcon style={iconStyles} />} // Apply custom CSS style
+        />
+        <BottomNavigationAction
+          label="Chat"
+          value="chat"
+          icon={<ChatIcon style={iconStyles} />} // Apply custom CSS style
+        />
+        <BottomNavigationAction
+          label="Review"
+          value="review"
+          icon={<RateReviewIcon style={iconStyles} />} // Apply custom CSS style
+        />
+        <BottomNavigationAction
+          label="Profile"
+          value="profile"
+          icon={<PersonIcon style={iconStyles} />} // Apply custom CSS style
+        />
       </BottomNavigation>
     </>
   );
