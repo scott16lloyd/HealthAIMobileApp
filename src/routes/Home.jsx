@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { Typography, FormControl, FormControlLabel, RadioGroup, Radio, Button, Box } from '@mui/material';
+import {
+  Typography,
+  FormControl,
+  FormControlLabel,
+  RadioGroup,
+  Radio,
+  Button,
+  Box,
+} from '@mui/material';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import HomeIcon from '@mui/icons-material/Home';
@@ -34,6 +42,7 @@ function MainPage() {
     "Have you been experiencing bowel problems?",
     "Have you experienced any rectal bleeding?",
   ];
+
   const handleAnswerChange = (question, event) => {
     setAnswers({ ...answers, [question]: event.target.value });
   };
@@ -41,18 +50,40 @@ function MainPage() {
   const handleSubmit = async () => {
     if (!user || !user.uid) {
       console.error('User not authenticated');
+      alert('User not authenticated'); 
       return;
     }
+  
+    console.log('Submitting test results for UID:', user.uid); 
   
     const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
   
     try {
-      await set(testHistoryRef, { answers });
+      const answersToSave = {};
+  
+      questions.forEach((question, index) => {
+        const answer = answers[question];
+        answersToSave[question] = answer;
+        console.log(`Question ${index + 1}: ${question}, Answer: ${answer}`); 
+      });
+  
+      console.log('Answers to be saved:', answersToSave); 
+
+      await set(testHistoryRef, answersToSave);
       console.log('Test results submitted successfully');
+      alert('Test results submitted successfully!'); 
+      setAnswers({}); 
+  
+      const today = new Date().toISOString().slice(0, 10);
+      const medicalRecordsRef = ref(database, `patients/${user.uid}/medicalRecords/${today}`);
+      await set(medicalRecordsRef, answersToSave);
+      console.log('Medical records submitted successfully');
     } catch (error) {
       console.error('Failed to submit test results:', error);
+      alert('Failed to submit test results. Please try again.'); 
     }
   };
+  
   
 
   const renderContent = () => {
@@ -61,8 +92,12 @@ function MainPage() {
         return (
           <>
             <UserProfile username={user ? user.displayName : 'Guest'} />
-            <Typography variant="h6" gutterBottom>Hello, {user ? user.displayName : 'Guest'}</Typography>
-            <Typography variant="subtitle1">How are you feeling today?</Typography>
+            <Typography variant="h6" gutterBottom>
+              Hello, {user ? user.displayName : 'Guest'}
+            </Typography>
+            <Typography variant="subtitle1">
+              How are you feeling today?
+            </Typography>
           </>
         );
 
@@ -96,7 +131,6 @@ function MainPage() {
           <>
             <UserProfile username={user ? user.displayName : 'Guest'} />
             <ViewProfile uid={user?.uid} />
-
           </>
         );
 
@@ -107,9 +141,7 @@ function MainPage() {
 
   return (
     <>
-      <div style={{ padding: '20px' }}>
-        {renderContent()}
-      </div>
+      <div style={{ padding: '20px' }}>{renderContent()}</div>
 
       <BottomNavigation
         value={value}
@@ -120,7 +152,7 @@ function MainPage() {
           width: '100%',
           position: 'fixed',
           bottom: 0,
-          zIndex: 1000
+          zIndex: 1000,
         }}
       >
         <BottomNavigationAction label="Home" value="home" icon={<HomeIcon />} />
