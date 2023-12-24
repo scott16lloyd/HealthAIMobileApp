@@ -89,14 +89,15 @@ function DocBotPage() {
   const { user } = UserAuth();
 
   // Message bubble logic
-  const [messages, setMessages] = useState([
-    {
-      type: 'bot',
-      content:
-        'Hello, I am the DocBot. Ask me a question or tell me a symptom and I will try my best to recommend a solution. ',
-    },
-  ]);
+  // const [messages, setMessages] = useState([
+  //   {
+  //     type: 'bot',
+  //     content:
+  //       'Hello, I am the DocBot. Ask me a question or tell me a symptom and I will try my best to recommend a solution. ',
+  //   },
+  // ]);
   const [input, setInput] = useState('');
+  const [conversation, setConversation] = useState([]);
 
   // Chat window ref
   const chatWindowRef = React.useRef(null);
@@ -108,15 +109,61 @@ function DocBotPage() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [conversation]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim() !== '') {
-      setMessages([...messages, { type: 'user', content: input }]);
+      // setMessages([...messages, { type: 'user', content: input }]);
       setInput('');
+      console.log(input);
       // Logic to generate bot response and update messages state
+      try {
+        // Endpoint for POST to Chatbot
+        const response = await fetch('http://127.0.0.1:3000/post', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user_input: input }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+
+        // Add user input and bot response to a conversation array to display conversation history
+        setConversation([
+          ...conversation, // Creates a spread of the conversation
+          { text: input, user: true },
+          { text: data.response, user: false },
+        ]);
+
+        // Set input to blank after POST
+        setInput('');
+      } catch (error) {
+        console.error('Error submitting input:', error);
+      }
     }
   };
+
+  useEffect(() => {
+    const startConversation = async () => {
+      try {
+        // Endpoint for Start - Welcome message
+        const response = await fetch('http://127.0.0.1:3000/start');
+        const data = await response.json();
+        // Set up the initial conversation with the start message
+        setConversation([{ text: data.message, user: false }]);
+      } catch (error) {
+        console.error('Error initiating conversation:', error);
+      }
+    };
+
+    startConversation();
+  }, []);
+
   return (
     <>
       <div style={outerWrapper}>
@@ -133,21 +180,19 @@ function DocBotPage() {
           <Typography variant="h4">Welcome to DocBot</Typography>
           <div style={mainWrapper}>
             <Paper elevation={1} style={chatWindowSurface}>
-              {messages.map((message, index) => (
+              {conversation.map((text, index) => (
                 <div
                   key={index}
-                  className={message.type}
+                  className={text.user}
                   style={{ display: 'flex', flexDirection: 'row' }}
                 >
                   <Paper
                     elevation={2}
                     style={
-                      message.type === 'bot'
-                        ? botMessageBubble
-                        : userMessageBubble
+                      text.user === true ? userMessageBubble : botMessageBubble
                     }
                   >
-                    <Typography variant="body1">{message.content}</Typography>
+                    <Typography variant="body1">{text.text}</Typography>
                   </Paper>
                 </div>
               ))}
