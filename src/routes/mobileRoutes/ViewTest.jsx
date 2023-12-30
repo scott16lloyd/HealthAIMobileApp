@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { database } from '../../firebase';
 import { ref, get } from 'firebase/database';
 import TargetAreaWidget from '../../components/widgets/TargetAreaWidget/TargetAreaWidget';
+import BackButton from '../../components/widgets/BackButton/BackButton';
 
 function ViewTest() {
   const [patientsData, setPatientsData] = useState([]);
@@ -86,6 +87,7 @@ function ViewTest() {
     flexDirection: 'column',
     alignItems: 'flex-start',
     paddingLeft: '1rem',
+    paddingTop: '1rem',
   };
 
   const widgetContainer = {
@@ -100,6 +102,7 @@ function ViewTest() {
     <>
       <MobileUserHeader />
       <div style={mainWrapper}>
+        <BackButton />
         <div style={titleWrapper}>
           <Typography variant="h3">Your Results</Typography>
           <div style={subheadingStyle}>
