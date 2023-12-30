@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import UserProfile from '../../components/widgets/UserProfile/UserProfile';
 import { UserAuth } from '../../components/auth/AuthContext';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import MobileUserHeader from '../../components/widgets/MobileUserHeader/MobileUserHeader';
 import {
   Typography,
   Paper,
@@ -16,14 +16,6 @@ function DocBotPage() {
     flexDirection: 'column',
     height: '95vh',
     overflow: 'hidden',
-  };
-
-  const topBarStyle = {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    flexShrink: 0,
   };
 
   const stageStyle = {
@@ -85,9 +77,6 @@ function DocBotPage() {
     wordWrap: 'break-word',
   };
 
-  // Logged in user object
-  const { user } = UserAuth();
-
   // Message bubble logic
   const [messages, setMessages] = useState([
     {
@@ -120,15 +109,7 @@ function DocBotPage() {
   return (
     <>
       <div style={outerWrapper}>
-        <div style={topBarStyle}>
-          {user ? <UserProfile /> : null}
-          <Typography variant="h5" style={{ fontSize: 25 }}>
-            Hello,
-            <Typography variant="h4" style={{ fontWeight: 600 }}>
-              {user.displayName ? user.displayName : 'User'}
-            </Typography>
-          </Typography>
-        </div>
+        <MobileUserHeader />
         <div style={stageStyle}>
           <Typography variant="h4">Welcome to DocBot</Typography>
           <div style={mainWrapper}>

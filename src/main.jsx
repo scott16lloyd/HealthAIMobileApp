@@ -12,7 +12,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import { AuthContextProvider } from './components/auth/AuthContext';
 import ViewProfile from './routes/ViewProfile';
 import ViewPatientScreen from './routes/ViewPatientScreen';
-import ViewTest from './routes/ViewTest';
+import ViewTest from './routes/mobileRoutes/ViewTest';
 import GPDetailsPage from './routes/mobileRoutes/GPDetailsPage';
 import InsuranceDetailsPage from './routes/mobileRoutes/InsuranceDetailsPage';
 import PlanSelectionPage from './routes/mobileRoutes/PlanSelectionPage';
@@ -38,10 +38,6 @@ function main() {
               path="/viewPatientDetails/:patID"
               element={<ViewPatientScreen />}
             />
-            <Route
-              path="/viewPatientDetails/:patID/test/:testDate"
-              element={<ViewTest />}
-            />
             <Route path="/mobileGPDetails" element={<GPDetailsPage />} />
             <Route
               path="/mobileInsuranceDetails"
@@ -53,6 +49,7 @@ function main() {
             />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/mobileReview" element={<ReviewPage />} />
+            <Route path="/viewTest" element={<ViewTest />} />
           </Routes>
         </div>
       </Router>
