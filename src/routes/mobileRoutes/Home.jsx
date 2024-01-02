@@ -87,7 +87,6 @@ function MainPage() {
 
 
   const handleSubmit = async () => {
-    debugger;
     if (!user || !user.uid) {
       console.error('User not authenticated');
       alert('User not authenticated'); 
@@ -189,7 +188,7 @@ function MainPage() {
                 </RadioGroup>
               </FormControl>
             ))}
-            {/* handleSubmit */}
+            {/* Change back to PrimaryButton */}
             <Box display="flex" justifyContent="center" mb={3}>
               <Button text={'Submit Test'} onClick={handleSubmit} />
             </Box>
