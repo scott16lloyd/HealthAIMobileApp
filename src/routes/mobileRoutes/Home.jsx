@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Typography,
-  FormControl,
-  FormControlLabel,
-  RadioGroup,
-  Radio,
-  Button,
-  Box,
+  Box, Grid, FormControl, RadioGroup, Radio, FormControlLabel,
+  Typography, Button, Slider as MuiSlider, Input, // Changed here
+  // ... other imports
 } from '@mui/material';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 import AlertBox from '../../components/widgets/AlertBox/AlertBox';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import HomeIcon from '@mui/icons-material/Home';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RateReviewIcon from '@mui/icons-material/RateReview';
 import ChatIcon from '@mui/icons-material/Chat';
 import PersonIcon from '@mui/icons-material/Person';
 import UserProfile from '../../components/widgets/UserProfile/UserProfile';
@@ -24,6 +20,8 @@ import { database } from '../../firebase';
 import { ref, set, get } from 'firebase/database';
 import ReviewPage from './ReviewPage';
 import TestHistoryWidget from '../../components/widgets/TestHistoryWidget/TestHistoryWidget';
+
+// ... rest of your code
 
 function MainPage() {
   const [value, setValue] = useState('home');
@@ -45,9 +43,9 @@ function MainPage() {
     "Have you undergone any unexpected weight loss?",
     "Do you experience significant chest pain on a regular basis?",
     "Have you had any stomach cramps?",
-    "What is your current Blood Pressure? (0 if not known)",
-    "What is your current Heart Rate? (0 if not known)",
-    "What is your Cholesterol level? (0 if not known)",
+    "What is your current Blood Pressure? (0-200)",
+    "What is your current Heart Rate? (0-200)",
+    "What is your Cholesterol level? (0-300)",
     "Are your fingertips a bright yellow?",
     "Have you experienced a high level of wheezing?",
     "Have you been coughing excessively?",
@@ -80,12 +78,28 @@ function MainPage() {
         });
     }
   }, [user]);
-  
 
-  const handleAnswerChange = (question, event) => {
-    setAnswers({ ...answers, [question]: event.target.value });
+  const handleAnswerChange = (question, newValue) => {
+    const value = newValue.target ? newValue.target.value : newValue;
+    setAnswers({ ...answers, [question]: value });
   };
 
+  const handleSliderChange = (question, newValue) => {
+    setAnswers({ ...answers, [question]: newValue });
+  };
+
+  const handleInputChange = (question, event) => {
+    setAnswers({ ...answers, [question]: event.target.value === '' ? 0 : Number(event.target.value) });
+  };
+
+  const handleBlur = (question) => {
+    const newValue = answers[question];
+    if (newValue < 0) {
+      setAnswers({ ...answers, [question]: 0 });
+    } else if (newValue > 100) {
+      setAnswers({ ...answers, [question]: 100 });
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -192,44 +206,82 @@ function MainPage() {
             )}
           </>
         );
+
+        case 'test':
+          return (
+            <div>
+              <Typography variant="h5" gutterBottom>Predict Your Health Results</Typography>
+              <Typography variant="h6" color={'#268AFF'} gutterBottom>
+                Answer these questions to get a prediction about your risk for colon cancer, lung cancer, and heart disease.
+              </Typography>
+              {questions.map((question, index) => {
+                const isSliderQuestion = ['What is your current Blood Pressure? (0-200)', 
+                                          'What is your current Heart Rate? (0-200)', 
+                                          'What is your Cholesterol level? (0-300)'].includes(question);
+                const value = answers[question] || 0;
+        
+                return (
+                  <FormControl key={index} component="fieldset">
+                    <Typography variant="subtitle1">{question}</Typography>
+                    {isSliderQuestion ? (
+                      <Box sx={{ width: 250 }}>
+                        <Grid container spacing={2} alignItems="center">
+                          <Grid item xs>
+                            <MuiSlider
+                              value={typeof value === 'number' ? value : 0}
+                              onChange={(event, newValue) => handleSliderChange(question, newValue)}
+                              aria-labelledby={`input-slider-${index}`}
+                              step={1}
+                              min={0}
+                              max={question.includes('Cholesterol') ? 300 : 200}
+                            />
+                          </Grid>
+                          <Grid item>
+                            <Input
+                              value={value}
+                              size="small"
+                              onChange={(event) => handleInputChange(question, event)}
+                              onBlur={() => handleBlur(question)}
+                              inputProps={{
+                                step: 1,
+                                min: 0,
+                                max: question.includes('Cholesterol') ? 300 : 200,
+                                type: 'number',
+                                'aria-labelledby': `input-slider-${index}`,
+                              }}
+                            />
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    ) : (
+                      <RadioGroup row onChange={(event) => handleAnswerChange(question, event)}>
+                        <FormControlLabel
+                          value="1"
+                          control={<Radio checked={answers[question] === "1"} />}
+                          label="Yes"
+                        />
+                        <FormControlLabel
+                          value="0"
+                          control={<Radio checked={answers[question] === "0"} />}
+                          label="No"
+                        />
+                      </RadioGroup>
+                    )}
+                  </FormControl>
+                );
+              })}
+              <AlertBox
+                message={errorMessage}
+                severity={severity}
+                onClose={() => setErrorMessage('')}
+              />
+              <Box display="flex" justifyContent="center" mb={3}>
+                <PrimaryButton text={'Submit Test'} action={handleSubmit} state={'active'} />
+              </Box>
+            </div>
+          );
+        
   
-  
-      case 'test':
-        return (
-          <div>
-            <Typography variant="h5" gutterBottom>Predict Your Health Results</Typography>
-            <Typography variant="h6" color={'#268AFF'} gutterBottom>
-              Answer these questions to get a prediction about your risk for colon cancer, lung cancer, and heart disease.
-            </Typography>
-            {questions.map((question, index) => (
-              <FormControl key={index} component="fieldset">
-                <Typography variant="subtitle1">{question}</Typography>
-                <RadioGroup row>
-                  <FormControlLabel
-                    value="1"
-                    control={<Radio checked={answers[question] === "1"} />}
-                    label="Yes"
-                    onChange={(event) => handleAnswerChange(question, event)}
-                  />
-                  <FormControlLabel
-                    value="0"
-                    control={<Radio checked={answers[question] === "0"} />}
-                    label="No"
-                    onChange={(event) => handleAnswerChange(question, event)}
-                  />
-                </RadioGroup>
-              </FormControl>
-            ))}
-          <AlertBox
-            message={errorMessage}
-            severity= {severity}
-            onClose={() => setErrorMessage('')}
-          />
-            <Box display="flex" justifyContent="center" mb={3}>
-              <PrimaryButton text={'Submit Test'} action={handleSubmit} state={'active'} />
-            </Box>
-          </div>
-        );
   
       case 'chat':
         return <Typography variant="h4">Chat Content</Typography>;
