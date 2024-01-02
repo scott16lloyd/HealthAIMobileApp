@@ -108,15 +108,13 @@ function MainPage() {
       });
   
       console.log('Answers to be saved:', answersToSave); 
-
-      // await set(testHistoryRef, answersToSave);
-      console.log('Test results submitted successfully');
-      alert('Test results submitted successfully!'); 
+ 
       setAnswers({}); 
-  
+      
       const today = new Date().toISOString().slice(0, 10);
       const medicalRecordsRef = ref(database, `patients/${user.uid}/medicalRecords/${today}`);
       await set(medicalRecordsRef, answersToSave);
+      alert('Questionnaire submitted successfully!');
       console.log('Medical records submitted successfully');
     } catch (error) {
       console.error('Failed to submit test results:', error);
@@ -190,7 +188,7 @@ function MainPage() {
             ))}
             {/* Change back to PrimaryButton */}
             <Box display="flex" justifyContent="center" mb={3}>
-              <Button text={'Submit Test'} onClick={handleSubmit} />
+              <PrimaryButton text={'Submit Test'} action={handleSubmit} state={'active'} />
             </Box>
           </div>
         );
