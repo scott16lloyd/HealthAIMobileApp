@@ -28,7 +28,7 @@ function MainPage() {
   const { user } = UserAuth();
   const [answers, setAnswers] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
-  const [testHistory, setTestHistory] = useState([]); 
+  const [medicalRecords, setMedicalRecords] = useState([]); 
   const [severity, setSeverity] = useState('success');
 
   const iconStyles = {
@@ -55,26 +55,22 @@ function MainPage() {
   ];
 
   useEffect(() => {
- 
     if (user && user.uid) {
-      const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
-  
-      get(testHistoryRef)
+      const medicalRecordsRef = ref(database, `patients/${user.uid}/medicalRecords`);
+      get(medicalRecordsRef)
         .then((snapshot) => {
           if (snapshot.exists()) {
-            const testHistoryData = snapshot.val();
-            if (testHistoryData && typeof testHistoryData === 'object') {
-             
-              const testHistoryArray = Object.values(testHistoryData);
-
-              setTestHistory(testHistoryArray);
+            const recordsData = snapshot.val();
+            if (recordsData && typeof recordsData === 'object') {
+              const recordsArray = Object.values(recordsData);
+              setMedicalRecords(recordsArray);  // Updated state
             } else {
-              console.error('Test history data is not in the expected format:', testHistoryData);
+              console.error('Medical records data is not in the expected format:', recordsData);
             }
           }
         })
         .catch((error) => {
-          console.error('Error fetching test history:', error);
+          console.error('Error fetching medical records:', error);
         });
     }
   }, [user]);
@@ -195,8 +191,8 @@ function MainPage() {
                 Contact GP
               </Button>
             </Box> <br></br>
-            {Array.isArray(testHistory) ? (
-              testHistory.map((testData, index) => (
+            {Array.isArray(medicalRecords) ? (
+              medicalRecords.map((testData, index) => (
                 <Box key={index} mb={2}>
                 <TestHistoryWidget key={index} date={testData.date} />
                 </Box>
