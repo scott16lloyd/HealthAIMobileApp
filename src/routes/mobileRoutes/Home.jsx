@@ -31,7 +31,7 @@ function MainPage() {
   const [answers, setAnswers] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
   const [testHistory, setTestHistory] = useState([]); 
-  const [severity, setSeverity] = useState('');
+  const [severity, setSeverity] = useState('success');
 
   const iconStyles = {
     fontSize: '35px',
