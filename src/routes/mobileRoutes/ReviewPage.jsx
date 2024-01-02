@@ -90,8 +90,7 @@ function ReviewPage() {
   return (
     <>
       <div style={wrapperStyle}>
-        <TitleText />
-        <BackButton />
+     
         <AlertBox
           message={errorMessage}
           severity={severity}

@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { auth } from '../firebase';
+import { auth } from '../../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
-import TopNavigationBar from '../components/widgets/TopNavigationBar/TopNavigationBar';
-import AlertBox from '../components/widgets/AlertBox/AlertBox';
+import { useNavigate, Link } from 'react-router-dom';
+import TopNavigationBar from '../../components/widgets/TopNavigationBar/TopNavigationBar';
+import AlertBox from '../../components/widgets/AlertBox/AlertBox';
 import { Container, Typography, Stack, TextField } from '@mui/material';
-import BackButton from '../components/widgets/BackButton/BackButton';
-import PrimaryButton from '../components/widgets/PrimaryButton/PrimaryButton';
-import SocialMediaSignInButton from '../components/widgets/SocialMediaSignInButton/SocialMediaSignInButton';
-import { UserAuth } from '../components/auth/AuthContext';
+import BackButton from '../../components/widgets/BackButton/BackButton';
+import PrimaryButton from '../../components/widgets/PrimaryButton/PrimaryButton';
+import { UserAuth } from '../../components/auth/AuthContext';
+
 
 function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState('');
-  const { googleSignIn, user } = UserAuth();
+  const { user } = UserAuth();
 
   const signIn = (e) => {
     e.preventDefault();
@@ -36,14 +36,6 @@ function SignInPage() {
           setErrorMessage('An error occurred. Please try again.');
         }
       });
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      await googleSignIn();
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   useEffect(() => {
@@ -82,11 +74,10 @@ function SignInPage() {
     backdropFilter: 'blur(1.5px)',
   };
 
-  const socialButtonContainerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
+  const troubleLoggingInSectionStyle = {
+    marginTop: '20px',
+    textAlign: 'center',
+    fontFamily: 'Roboto, sans-serif',
   };
 
   return (
@@ -98,22 +89,17 @@ function SignInPage() {
         onClose={() => setErrorMessage('')}
       />
       <Container>
-        <div
-          style={{ display: 'flex', alignItems: 'center', marginTop: '1rem' }}
-        >
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: '0.5rem' }}>
           <BackButton style={backButtonStyle} goBackPath={'/'} />
-          <Typography variant="h4" align="left">
-            Login
-          </Typography>
+          <Typography variant="h5" paddingLeft={'35px'}>Login</Typography>
           <span style={spaceStyle}></span>
-          <Typography variant="h7" align="left" style={mandatoryStyle}>
-            Mandatory *
-          </Typography>
         </div>
         <Stack direction="row" spacing={2} justifyContent="center">
           {' '}
-          {/** Stacking textfields in 4, 4, 2 + 1 button */}
           <div style={columnStyle}>
+            <Typography fontSize={'15px'} paddingLeft={'20px'}>
+              Using your temporary password.
+            </Typography>
             <TextField
               label="Email"
               variant="filled"
@@ -134,21 +120,17 @@ function SignInPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <PrimaryButton
-              text={'Login'}
-              type="submit"
-              action={signIn}
-              state={'active'}
-            />{' '}
+            <PrimaryButton text={'Login'} type="submit" action={signIn} state={'active'} />{' '}
+            <div style={troubleLoggingInSectionStyle}>
+              Trouble logging in?{' '}
+              <Link to="/help" style={{ textDecoration: 'underline' }}>
+                Click here.
+              </Link>
+            </div>
           </div>
         </Stack>
-        <div style={socialButtonContainerStyle}>
-          <SocialMediaSignInButton
-            socialPlatform={'google'}
-            action={handleGoogleSignIn}
-          />
-        </div>
       </Container>
+
     </>
   );
 }

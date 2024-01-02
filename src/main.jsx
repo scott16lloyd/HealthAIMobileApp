@@ -1,16 +1,15 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './routes/Home';
-import LandingPage from './routes/LandingPage';
-import DocBotPage from './routes/mobileRoutes/DocBotPage';
+import Home from './routes/mobileRoutes/Home';
+import LandingPage from './routes/mobileRoutes/LandingPage';
+import DocBotPage from './routes/DocBotPage';
 import HelpPage from './routes/HelpPage';
 import About from './routes/About';
-import LoginPage from './routes/LoginPage';
-import SignUpPage from './routes/SignUpPage';
+import LoginPage from './routes/mobileRoutes/LoginPage';
 import PatientDetails from './routes/PatientDetails';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { AuthContextProvider } from './components/auth/AuthContext';
-import ViewProfile from './routes/ViewProfile';
+import ViewProfile from './routes/mobileRoutes/ViewProfile';
 import ViewPatientScreen from './routes/ViewPatientScreen';
 import ViewTest from './routes/ViewTest';
 import GPDetailsPage from './routes/mobileRoutes/GPDetailsPage';
@@ -32,7 +31,6 @@ function main() {
             <Route path="/about" element={<About />} />
             <Route path="/help" element={<HelpPage />} />
             <Route path="/details" element={<PatientDetails />} />
-            <Route path="/signUp" element={<SignUpPage />} />
             <Route path="/viewProfile" element={<ViewProfile />} />
             <Route
               path="/viewPatientDetails/:patID"

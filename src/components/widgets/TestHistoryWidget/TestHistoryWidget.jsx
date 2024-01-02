@@ -24,9 +24,9 @@ function TestHistoryWidget({ date }) {
         size="md"
         variant="outlined"
         sx={{
-          backgroundColor: 'rgba(217,217,217,0.4)',
-          width: '900px',
-          height: '100px',
+          backgroundColor: 'rgba(217, 217, 217, 0.4)',
+          width: '300px', // Reduced width
+          height: '80px', // Reduced height
           borderRadius: 5,
           paddingX: 2,
           display: 'flex',
@@ -41,7 +41,7 @@ function TestHistoryWidget({ date }) {
             alignItems: 'flex-start',
           }}
         >
-          <Typography variant="h5">View Test From</Typography>
+          <Typography variant="subtitle1">View Test From</Typography>
           <Typography variant="h6" color={'#2187FF'}>
             {date}
           </Typography>
@@ -52,8 +52,9 @@ function TestHistoryWidget({ date }) {
               key={index}
               variant="outlined"
               sx={{
-                width: '80px',
-                height: '80px',
+                width: '40px',
+                height: '40px', 
+                marginBottom: '20px',
                 borderRadius: 4,
                 marginLeft: index !== 0 ? '0.5rem' : 0,
               }}

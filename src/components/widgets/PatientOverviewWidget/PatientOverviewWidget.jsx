@@ -38,51 +38,27 @@ function stringAvatar(name) {
 }
 
 function PatientOverviewWidget({ name, id }) {
-  const avatarContainerStyles = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
-    width: '40%',
-    paddingLeft: '1rem',
-  };
-
-  const textContainerStyles = {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    height: '100%',
-    paddingLeft: '1rem',
-  };
-
   return (
     <ButtonBase
       sx={{
         borderRadius: 5,
-        width: {
-          xs: 160,
-          sm: 200,
-          md: 240,
-          lg: 280,
-          xl: 320,
-        },
-        height: 150,
+        width: '100%',
         backgroundColor: '#F9F9F9',
         display: 'flex',
         padding: '0.2rem',
       }}
     >
       <Card
-        size="md"
         variant="outlined"
         sx={{
-          width: 320,
-          height: 150,
+          width: '100%',
           borderRadius: 5,
           backgroundColor: '#F9F9F9',
           display: 'flex',
-          transition: '0.3s', // Optional: Add a transition for smooth hover effect
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          transition: '0.3s',
           '&:hover': {
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
           },
@@ -92,34 +68,42 @@ function PatientOverviewWidget({ name, id }) {
           backdropFilter: 'blur(1.5px)',
         }}
       >
-        <div style={avatarContainerStyles}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '1rem',
+          }}
+        >
           <Avatar
             style={{
-              height: '80px',
-              width: '80px',
-              fontSize: '2rem',
+              height: '60px',
+              width: '60px',
+              fontSize: '1.5rem',
+              marginRight: '1rem',
             }}
             variant="outlined"
             alt="Default Profile Image"
             {...stringAvatar(name)}
           />
-        </div>
-        <div style={textContainerStyles}>
-          <Typography
-            sx={{
-              fontSize: '2rem',
-            }}
-            style={{ textAlign: 'left' }}
-          >
-            {name}
-          </Typography>
-          <Typography
-            sx={{
-              fontSize: '1.2rem',
-            }}
-          >
-            ID: {id}
-          </Typography>
+          <div>
+            <Typography
+              sx={{
+                fontSize: '1.2rem',
+                fontWeight: 500,
+                textAlign: 'left',
+              }}
+            >
+              {name}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '1rem',
+              }}
+            >
+              ID: {id}
+            </Typography>
+          </div>
         </div>
       </Card>
     </ButtonBase>

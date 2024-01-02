@@ -78,13 +78,13 @@ function UserProfile() {
     backdropFilter: 'blur(1.5px)',
   };
   return (
-    <div style={{ display: 'flex', margin: '2rem' }}>
+    <div style={{ display: 'flex', paddingBottom: '10px' }}>
       <Tooltip>
         <Avatar
           style={{
-            height: '80px',
-            width: '80px',
-            fontSize: '2rem',
+            height: '60px',
+            width: '60px',
+            fontSize: '1.5rem',
             cursor: 'pointer',
           }}
           sx={avatarStyling}

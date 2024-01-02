@@ -110,8 +110,7 @@ function HelpPage() {
 
         {/* Add more questions and answers as needed */}
       </Container>
-      <br></br>
-      <Footer />
+    
     </>
   );
 }
