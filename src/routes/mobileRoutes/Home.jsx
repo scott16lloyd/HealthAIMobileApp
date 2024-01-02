@@ -24,6 +24,7 @@ import { database } from '../../firebase';
 import { ref, set, get } from 'firebase/database';
 import ReviewPage from './ReviewPage';
 import TestHistoryWidget from '../../components/widgets/TestHistoryWidget/TestHistoryWidget';
+import LandingPage from './LandingPage';
 
 function MainPage() {
   const [value, setValue] = useState('home');
@@ -43,6 +44,9 @@ function MainPage() {
     "Have you undergone any unexpected weight loss?",
     "Do you experience significant chest pain on a regular basis?",
     "Have you had any stomach cramps?",
+    "What is your current Blood Pressure? (0 if not known)",
+    "What is your current Heart Rate? (0 if not known)",
+    "What is your Cholesterol level? (0 if not known)",
     "Are your fingertips a bright yellow?",
     "Have you experienced a high level of wheezing?",
     "Have you been coughing excessively?",
@@ -81,7 +85,9 @@ function MainPage() {
     setAnswers({ ...answers, [question]: event.target.value });
   };
 
+
   const handleSubmit = async () => {
+    debugger;
     if (!user || !user.uid) {
       console.error('User not authenticated');
       alert('User not authenticated'); 
@@ -90,20 +96,21 @@ function MainPage() {
   
     console.log('Submitting test results for UID:', user.uid); 
   
-    const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
+    //const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
   
     try {
       const answersToSave = {};
   
       questions.forEach((question, index) => {
         const answer = answers[question];
-        answersToSave[question] = answer;
+        var Q = 'Q';
+        answersToSave[Q + (index + 1)] = answer;
         console.log(`Question ${index + 1}: ${question}, Answer: ${answer}`); 
       });
   
       console.log('Answers to be saved:', answersToSave); 
 
-      await set(testHistoryRef, answersToSave);
+      // await set(testHistoryRef, answersToSave);
       console.log('Test results submitted successfully');
       alert('Test results submitted successfully!'); 
       setAnswers({}); 
@@ -182,8 +189,9 @@ function MainPage() {
                 </RadioGroup>
               </FormControl>
             ))}
+            {/* handleSubmit */}
             <Box display="flex" justifyContent="center" mb={3}>
-              <PrimaryButton text={'Submit Test'} onClick={handleSubmit} state={'active'} />
+              <Button text={'Submit Test'} onClick={handleSubmit} />
             </Box>
           </div>
         );
