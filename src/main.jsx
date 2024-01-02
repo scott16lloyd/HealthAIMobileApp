@@ -17,6 +17,7 @@ import InsuranceDetailsPage from './routes/mobileRoutes/InsuranceDetailsPage';
 import PlanSelectionPage from './routes/mobileRoutes/PlanSelectionPage';
 import Checkout from './routes/mobileRoutes/checkout';
 import ReviewPage from './routes/mobileRoutes/ReviewPage';
+import Diary from './routes/mobileRoutes/diary';
 
 function main() {
   return (
@@ -31,6 +32,7 @@ function main() {
             <Route path="/about" element={<About />} />
             <Route path="/help" element={<HelpPage />} />
             <Route path="/details" element={<PatientDetails />} />
+            <Route path='/diary' element={<Diary />} />
             <Route path="/viewProfile" element={<ViewProfile />} />
             <Route
               path="/viewPatientDetails/:patID"
