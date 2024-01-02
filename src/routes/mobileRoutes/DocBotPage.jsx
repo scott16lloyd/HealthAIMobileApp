@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import UserProfile from '../../components/widgets/UserProfile/UserProfile';
 import { UserAuth } from '../../components/auth/AuthContext';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -11,6 +12,7 @@ import {
 } from '@mui/material';
 
 function DocBotPage() {
+  // Styles
   const outerWrapper = {
     display: 'flex',
     flexDirection: 'column',
@@ -92,31 +94,39 @@ function DocBotPage() {
   const [messages, setMessages] = useState([
     {
       type: 'bot',
-      content:
-        'Hello, I am the DocBot. Ask me a question or tell me a symptom and I will try my best to recommend a solution. ',
+      content: 'Hello, I am the DocBot. Ask me a question or tell me a symptom and I will try my best to recommend a solution.',
     },
   ]);
   const [input, setInput] = useState('');
 
-  // Chat window ref
+  // Chat window ref for auto-scrolling
   const chatWindowRef = React.useRef(null);
 
-  // Allow for auto scroll when new messeage submitted
-  const scrollToBottom = () => {
-    chatWindowRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  // Auto-scroll to bottom of chat window when new message arrives
   useEffect(() => {
-    scrollToBottom();
+    chatWindowRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Function to handle sending message
   const handleSend = () => {
     if (input.trim() !== '') {
+      // Add user message to chat
       setMessages([...messages, { type: 'user', content: input }]);
+  
+      
+      axios.post('https://docbot-image-tmzbdquo3q-lz.a.run.app/post', { user_input: input })
+        .then(response => {
+          // Add bot response to chat
+          setMessages(prev => [...prev, { type: 'bot', content: response.data.response }]);
+        })
+        .catch(error => console.error('Error:', error));
+  
+      // Clear input field
       setInput('');
-      // Logic to generate bot response and update messages state
     }
   };
+  
+
   return (
     <>
       <div style={outerWrapper}>
@@ -136,7 +146,7 @@ function DocBotPage() {
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={message.type}
+                  className={message.type === 'bot' ? 'botMessage' : 'userMessage'}
                   style={{ display: 'flex', flexDirection: 'row' }}
                 >
                   <Paper
