@@ -45,9 +45,9 @@ function MainPage() {
     "Have you undergone any unexpected weight loss?",
     "Do you experience significant chest pain on a regular basis?",
     "Have you had any stomach cramps?",
-    "What is your current Blood Pressure? (0 if not known)",
-    "What is your current Heart Rate? (0 if not known)",
-    "What is your Cholesterol level? (0 if not known)",
+    "What is your current Blood Pressure? (0 to 300)",
+    "What is your current Heart Rate? (0 to 300)",
+    "What is your Cholesterol level? (0 to 300",
     "Are your fingertips a bright yellow?",
     "Have you experienced a high level of wheezing?",
     "Have you been coughing excessively?",
@@ -61,6 +61,7 @@ function MainPage() {
     if (user && user.uid) {
       const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
   
+
       get(testHistoryRef)
         .then((snapshot) => {
           if (snapshot.exists()) {
