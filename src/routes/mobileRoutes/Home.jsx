@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Grid,
-  FormControl,
-  RadioGroup,
-  Radio,
-  FormControlLabel,
-  Typography,
-  Button,
-  Slider as MuiSlider,
-  Input, 
-} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Box, Grid, FormControl, RadioGroup, Radio, FormControlLabel, Typography, Slider as MuiSlider, Input } from '@mui/material';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import AlertBox from '../../components/widgets/AlertBox/AlertBox';
 import BottomNavigation from '@mui/material/BottomNavigation';
@@ -29,14 +19,50 @@ import ReviewPage from './ReviewPage';
 import TestHistoryWidget from '../../components/widgets/TestHistoryWidget/TestHistoryWidget';
 import DocBotPage from './DocBotPage';
 
-
 function MainPage() {
   const [value, setValue] = useState('home');
   const { user } = UserAuth();
   const [answers, setAnswers] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
-  const [testHistory, setTestHistory] = useState([]); 
+  const [testHistory, setTestHistory] = useState([]);
   const [severity, setSeverity] = useState('success');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && user.uid) {
+      const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
+      get(testHistoryRef)
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            setTestHistory(Object.entries(data)); 
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching test history:', error);
+        });
+    }
+  }, [user]);
+
+  const handleJournalClick = () => {
+    navigate('/diary');
+  };
+
+
+  const handleTestHistoryClick = (testDate) => {
+    navigate(`/viewTest/${testDate}`);
+  };
+  
+
+
+  const PrimaryButton = ({ text, action, state }) => {
+    return (
+      <button onClick={action} disabled={state !== 'active'}>
+        {text}
+      </button>
+    );
+  };
+  
 
   const iconStyles = {
     fontSize: '35px',
@@ -61,29 +87,7 @@ function MainPage() {
     'Have you experienced any rectal bleeding?',
   ];
 
-  useEffect(() => {
-    if (user && user.uid) {
-      const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
-  
-      get(testHistoryRef)
-        .then((snapshot) => {
-          if (snapshot.exists()) {
-            const testHistoryData = snapshot.val();
-            if (testHistoryData && typeof testHistoryData === 'object') {
-             
-              const testHistoryArray = Object.values(testHistoryData);
 
-              setTestHistory(testHistoryArray);
-            } else {
-              console.error('Test history data is not in the expected format:', testHistoryData);
-            }
-          }
-        })
-        .catch((error) => {
-          console.error('Error fetching medical records:', error);
-        });
-    }
-  }, [user]);
 
   const handleAnswerChange = (question, newValue) => {
     const value = newValue.target ? newValue.target.value : newValue;
@@ -179,41 +183,16 @@ function MainPage() {
             <Typography variant="h6" gutterBottom>
               Hello, {user ? user.displayName : 'Guest'}
             </Typography>
-            <Typography variant="subtitle1">
-              How are you feeling today?
-            </Typography>
             <Box display="flex" justifyContent="center" mt={3}>
-              <Button
-                variant="contained"
-                color="primary"
-                style={{ marginRight: '16px' }}
-                onClick={() => {
-                  console.log('Contact Insurance button clicked');
-                }}
-              >
-                Contact Insurance
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  console.log('Contact GP button clicked');
-                }}
-              >
-                Contact GP
-              </Button>
-            </Box> <br></br>
-            {Array.isArray(testHistory) ? (
-              testHistory.map((testData, index) => (
-                <Box key={index} mb={2}>
-                  <TestHistoryWidget key={index} date={testData.date} />
-                </Box>
-              ))
-            ) : (
-              <Typography variant="subtitle1">
-                Test history data is not available.
-              </Typography>
-            )}
+              <PrimaryButton text="Health Journal" action={handleJournalClick} state="active" />
+            </Box>
+            <br />
+           
+                {testHistory.map(([testDate, testData], index) => (
+          <Box key={index} mb={2} onClick={() => handleTestHistoryClick(testDate)}>
+            <TestHistoryWidget date={testDate} />
+              </Box>
+            ))}
           </>
         );
 

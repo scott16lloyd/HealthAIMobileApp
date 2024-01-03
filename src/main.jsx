@@ -34,6 +34,8 @@ function main() {
             <Route path="/details" element={<PatientDetails />} />
             <Route path='/diary' element={<Diary />} />
             <Route path="/viewProfile" element={<ViewProfile />} />
+            <Route path="/viewTest/:testDate" element={<ViewTest />} />
+
             <Route
               path="/viewPatientDetails/:patID"
               element={<ViewPatientScreen />}

@@ -147,12 +147,7 @@ function DocBotPage() {
       <div style={outerWrapper}>
         <div style={topBarStyle}>
           {user ? <UserProfile /> : null}
-          <Typography variant="h5" style={{ fontSize: 25 }}>
-            Hello,
-            <Typography variant="h4" style={{ fontWeight: 600 }}>
-              {user.displayName ? user.displayName : 'User'}
-            </Typography>
-          </Typography>
+          
         </div>
         <div style={stageStyle}>
           <Typography variant="h4">Welcome to DocBot</Typography>

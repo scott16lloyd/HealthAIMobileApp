@@ -1,196 +1,205 @@
-import React, { useEffect, useState } from 'react';
-import { Typography, Card } from '@mui/material';
-import { UserAuth } from '../components/auth/AuthContext';
-import TopNavigationBar from '../components/widgets/TopNavigationBar/TopNavigationBar';
-import UserProfile from '../components/widgets/UserProfile/UserProfile';
-import BackButton from '../components/widgets/BackButton/BackButton';
-import TargetAreaWidget from '../components/widgets/TargetAreaWidget/TargetAreaWidget';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Typography, Box, CircularProgress, Card, CardContent } from '@mui/material';
 import { database } from '../firebase';
+import styled from 'styled-components';
+import BackButton from '../components/widgets/BackButton/BackButton';
+
 import { ref, get } from 'firebase/database';
+import { UserAuth } from '../components/auth/AuthContext';
+
+import lungImage from '../images/lungImage.png';
+import heartImage from '../images/heartImage.png';
+import colonImage from '../images/colonImage.png';
+
+const StyledBox = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Align content to the top */
+  padding: 16px;
+  margin: 16px;
+  background-color: #f5f5f5;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+`;
+
+const ContentContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center the cards horizontally */
+  width: 100%;
+`;
+
+const BackButtonContainer = styled.div`
+  align-self: flex-start; /* Align the Back button to the left */
+  margin-bottom: 16px; /* Add margin to separate the Back button from content */
+`;
+
+const StyledResultCard = styled(Card)`
+  margin-top: 16px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+`;
+
+const CircularBorder = styled.div`
+  width: 80px;
+  height: 80px;
+  border: 4px solid ${(props) => {
+    const percentage = parseFloat(props.percentage);
+    if (percentage < 33) return 'green'; // Green for < 33%
+    if (percentage < 66) return 'orange'; // Orange for 33-66%
+    return 'red'; // Red for > 66%
+  }};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+`;
+
+const CardImage = styled.img`
+  width: 60px;
+  height: 60px;
+  margin-right: 16px;
+`;
+
+const CardTitle = styled(Typography)`
+  font-size: 16px;
+  text-align: center;
+`;
+
+const CardSubtitle = styled(Typography)`
+  font-size: 12px;
+  text-align: center;
+`;
+
+const CircularNumber = styled.div`
+  font-size: 20px;
+`;
+
+const PatientInfo = styled.div`
+  text-align: center;
+  margin-bottom: 16px;
+`;
+
+const ExplanationSection = styled.div`
+  margin-top: 24px;
+  text-align: left; /* Align the text to the left */
+  max-width: 600px; /* Limit the width of the explanation section */
+`;
 
 function ViewTest() {
-  const doctorID = '1234567890';
-  const apiUrl = `https://healthai-40b47-default-rtdb.europe-west1.firebasedatabase.app/patients.json?Authorization=Bearerhttps&orderBy="Doctor"&equalTo="${doctorID}"`;
-
-  const [patientsData, setPatientsData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const { patID, testDate } = useParams();
-
-  const patIDNumber = parseInt(patID, 10);
-  const patientRef = ref(database, 'patients');
-
-  // Read the data at the reference
-  const [patient, setPatient] = useState(null);
-  const [testResult, setTestResult] = useState({
-    colonResult: 'N/A',
-    heartResult: 'N/A',
-    lungResult: 'N/A',
-  });
-  console.log(testResult);
-  console.log(testResult.colonResult);
-  console.log(patient);
-  useEffect(() => {
-    const fetchPatientData = async () => {
-      // Fetch user data
-      try {
-        const userSnapshot = await get(patientRef);
-        if (userSnapshot.exists()) {
-          const patientData = userSnapshot.val();
-
-          // Convert object values to an array
-          const patientArray = Object.values(patientData);
-
-          // Find the patient with the matching patID
-          const patient = patientArray.find(
-            (patient) => patient.patID === patIDNumber
-          );
-          setPatient(patient);
-
-          // Access resultHistory from the patient object
-          const testResult = patient.resultHistory[testDate];
-
-          if (testResult) {
-            setTestResult(testResult);
-          } else {
-            console.log(`No test result found for ${testDate}`);
-          }
-        } else {
-          console.log('No patient data found.');
-        }
-      } catch (error) {
-        console.error('Error accessing patient data:', error);
-      } finally {
-        // Set isLoading to false after fetching data
-        setIsLoading(false);
-      }
-    };
-    // Add a closing brace for the fetchPatientData function
-    fetchPatientData();
-  }, []);
-
-  const topBarWrapper = {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingRight: '2rem',
-  };
-
-  const outerWrapper = {
-    width: '100%',
-    height: '70%',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  };
-
-  const titleWrapper = {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: '1rem',
-  };
-
-  const leftColumnStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    marginLeft: '4rem',
-    gap: '3rem',
-    width: '50vw',
-  };
-
-  const rightColumnStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    marginRight: '15rem',
-  };
-
-  const widgetContainer = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '3rem',
-    marginLeft: '9rem',
-  };
-
-  const questionCardStyle = {
-    width: '550px',
-    height: '90%',
-    backgroundColor: '#D9D9D9',
-    borderRadius: 20,
-    padding: '2rem',
-    overflowY: 'auto',
-    overflowX: 'hidden',
-  };
-
+  const [testResults, setTestResults] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { testDate } = useParams();
   const { user } = UserAuth();
 
-  var questions = {
-    'Question 1': 'Answer 1',
-    'Question 2': 'Answer 2',
-    'Question 3': 'Answer 3',
-    'Question 4': 'Answer 4',
-    'Question 5': 'Answer 5',
-    'Question 6': 'Answer 6',
-    'Question 7': 'Answer 7',
-    'Question 8': 'Answer 8',
-    'Question 9': 'Answer 9',
-    'Question 10': 'Answer 10',
-  };
+  useEffect(() => {
+    if (user && user.uid && testDate) {
+      const testRef = ref(database, `patients/${user.uid}/testHistory/${testDate}`);
+
+      get(testRef)
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            setTestResults(snapshot.val());
+          } else {
+            console.log('No test results available for this date.');
+          }
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching test results:', error);
+          setLoading(false);
+        });
+    }
+  }, [user, testDate]);
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+  if (!testResults) {
+    return (
+      <StyledBox>
+        <BackButtonContainer>
+          <BackButton style={{ alignSelf: 'flex-start' }} />
+        </BackButtonContainer>
+        <Typography>No test results found for the selected date.</Typography>
+      </StyledBox>
+    );
+  }
 
   return (
-    <>
-      <div style={topBarWrapper}>
-        <TopNavigationBar />
-        {user ? <UserProfile /> : null}
-      </div>
-      <div style={outerWrapper}>
-        {isLoading ? (
-          <div>Loading...</div>
-        ) : (
-          <div style={leftColumnStyle}>
-            <div style={titleWrapper}>
-              <BackButton goBackPath={`/viewPatientDetails/${patID}`} />
-              <Typography variant="h3">View Test From:</Typography>
-              <Typography variant="h3" color={'#2187FF'}>
-                {testDate}
-              </Typography>
-            </div>
-            <div style={widgetContainer}>
-              {testResult && (
-                <>
-                  <TargetAreaWidget
-                    cancerType={'Colon Cancer'}
-                    result={testResult.colonResult}
-                  />
-                  <TargetAreaWidget
-                    cancerType={'Heart Cancer'}
-                    result={testResult.heartResult}
-                  />
-                  <TargetAreaWidget
-                    cancerType={'Lung Cancer'}
-                    result={testResult.lungResult}
-                  />
-                </>
-              )}
-            </div>
-          </div>
-        )}
-        <div style={rightColumnStyle}>
-          <Card style={questionCardStyle}>
-            {Object.entries(questions).map(([question, answer]) => (
-              <div key={question}>
-                <Typography variant="h5">{question}</Typography>
-                <Typography variant="subtitle1">{answer}</Typography>
-                <hr style={{ margin: '1rem 0', border: '0.5px solid #000' }} />
-              </div>
-            ))}
-          </Card>
-        </div>
-      </div>
-    </>
+    <StyledBox>
+      <BackButtonContainer>
+        <BackButton style={{ alignSelf: 'flex-start' }} />
+      </BackButtonContainer>
+      <ContentContainer>
+        <Typography variant="h6" align="center" gutterBottom>
+          Test Results for {testDate}
+        </Typography>
+
+
+        <StyledResultCard>
+          <CardImage src={lungImage} alt="Lung Cancer" />
+          <CircularBorder percentage={parseFloat(testResults.Lung)}>
+            <CircularNumber>{testResults.Lung || 'N/A'}</CircularNumber>
+          </CircularBorder>
+          <CardSubtitle variant="subtitle1">Lung Cancer</CardSubtitle>
+        </StyledResultCard>
+
+        <StyledResultCard>
+          <CardImage src={heartImage} alt="Heart Disease" />
+          <CircularBorder percentage={parseFloat(testResults.Heart)}>
+            <CircularNumber>{testResults.Heart || 'N/A'}</CircularNumber>
+          </CircularBorder>
+          <CardSubtitle variant="subtitle1">Heart Disease</CardSubtitle>
+        </StyledResultCard>
+
+        <StyledResultCard>
+          <CardImage src={colonImage} alt="Colon Cancer" />
+          <CircularBorder percentage={parseFloat(testResults.Colon)}>
+            <CircularNumber>{testResults.Colon || 'N/A'}</CircularNumber>
+          </CircularBorder>
+          <CardSubtitle variant="subtitle1">Colon Cancer</CardSubtitle>
+        </StyledResultCard>
+
+        {/* Explanation Section */}
+        <ExplanationSection>
+          <Typography variant="h6" gutterBottom>
+            Test Result Explanations
+          </Typography>
+          <Typography>
+            In the test results, color-coded circular borders are used to indicate the risk level associated with each result:
+          </Typography>
+          <ul>
+            <li>
+              <span style={{ color: 'red', fontWeight: 'bold' }}>Red:</span> High Risk
+              <span role="img" aria-label="High Risk">🔴</span>
+            </li>
+            <li>
+              <span style={{ color: 'orange', fontWeight: 'bold' }}>Orange:</span> Moderate Risk
+              <span role="img" aria-label="Moderate Risk">🟠</span>
+            </li>
+            <li>
+              <span style={{ color: 'green', fontWeight: 'bold' }}>Green:</span> Low Risk
+              <span role="img" aria-label="Low Risk">🟢</span>
+            </li>
+          </ul>
+          <Typography>
+            These colors help you quickly assess the risk level associated with each test result. Red indicates a high risk, orange suggests a moderate risk, and green signifies a low risk.
+          </Typography>
+        </ExplanationSection>
+      </ContentContainer>
+    </StyledBox>
   );
 }
 
