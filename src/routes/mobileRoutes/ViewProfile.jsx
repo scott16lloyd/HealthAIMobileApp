@@ -22,7 +22,7 @@ function ViewProfile() {
       const database = getDatabase();
 
       try {
-        // Fetch patient data
+  
         const patientSnapshot = await get(ref(database, `patients/${user.uid}`));
         if (!patientSnapshot.exists()) {
           setError('No patient data found.');
@@ -31,7 +31,6 @@ function ViewProfile() {
         }
         setPatientData(patientSnapshot.val());
 
-        // Fetch all doctors to find the one with matching GP ID
         const gpIdNumber = patientSnapshot.val().doctor;
         const doctorsSnapshot = await get(ref(database, 'doctors'));
         if (doctorsSnapshot.exists()) {
@@ -85,7 +84,7 @@ function ViewProfile() {
           <ListItem>Doctor: {doctorDetails.forename} {doctorDetails.surname}</ListItem>
           <ListItem>Office Address: {doctorDetails.officeAddress || 'N/A'}</ListItem>
           <ListItem>Telephone: {doctorDetails.telephone || 'N/A'}</ListItem>
-          {/* Add more doctor details here if needed */}
+  
         </List>
       </Paper>
     );
@@ -97,13 +96,13 @@ function ViewProfile() {
       display: 'flex',
       flexDirection: 'column',
       fontFamily: 'Roboto, sans-serif',
-      gap: '20px', // Add space between sections
+      gap: '20px', 
       padding: '20px',
     },
     titleWrapper: {
       display: 'flex',
       flexDirection: 'row',
-      marginBottom: '20px', // Space above the title
+      marginBottom: '20px', 
     },
     titleStyle: {
       fontFamily: 'Roboto, sans-serif',
@@ -114,11 +113,11 @@ function ViewProfile() {
     },
     paperStyle: {
       padding: '20px',
-      backgroundColor: '#f5f5f5', // Light gray background for paper
+      backgroundColor: '#f5f5f5', 
     },
     headerStyle: {
       fontWeight: 600,
-      color: '#1976d2', // 
+      color: '#1976d2', 
       marginBottom: '10px',
     },
     header: {

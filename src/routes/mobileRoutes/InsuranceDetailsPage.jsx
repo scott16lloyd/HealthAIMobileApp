@@ -115,7 +115,7 @@ function InsuranceDetailsPage() {
   return (
     <div style={wrapperStyle}>
       <TitleText />
-      <BackButton />
+      <BackButton goBackPath={'/'} />
       <AlertBox
         message={errorMessage}
         severity={'error'}

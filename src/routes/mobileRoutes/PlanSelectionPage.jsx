@@ -64,7 +64,7 @@ function PlanSelectionPage() {
     <>
       <div style={wrapperStyle}>
         <TitleText />
-        <BackButton />
+        <BackButton goBackPath={'/'} />
         <div style={mainWrapper}>
           <Paper elevation={3} style={planBox}>
             <div style={boxItems}>
