@@ -107,7 +107,7 @@ function ViewTest() {
         .then((snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.val();
-            console.log('Data from the database:', data); // Log the data
+            console.log('Data from the database:', data); 
             setTestResults(data);
           } else {
             console.log('No test results available for this date.');

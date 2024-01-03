@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Grid, FormControl, RadioGroup, Radio, FormControlLabel, Typography, Slider as MuiSlider, Input } from '@mui/material';
+import {
+  Box,
+  Grid,
+  FormControl,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
+  Typography,
+  Slider as MuiSlider,
+  Input,
+} from '@mui/material';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import AlertBox from '../../components/widgets/AlertBox/AlertBox';
 import BottomNavigation from '@mui/material/BottomNavigation';
@@ -48,18 +58,15 @@ function MainPage() {
     navigate('/diary');
   };
 
-
   const handleTestHistoryClick = (testDate) => {
     navigate(`/viewTest/${testDate}`);
   };
-  
-
 
   const PrimaryButton = ({ text, action, state }) => {
     return (
       <button
-        variant="contained" 
-        color="primary" 
+        variant="contained"
+        color="primary"
         onClick={action}
         disabled={state !== 'active'}
       >
@@ -67,7 +74,6 @@ function MainPage() {
       </button>
     );
   };
-  
 
   const iconStyles = {
     fontSize: '35px',
@@ -91,8 +97,6 @@ function MainPage() {
     'Have you been experiencing bowel problems?',
     'Have you experienced any rectal bleeding?',
   ];
-
-
 
   const handleAnswerChange = (question, newValue) => {
     const value = newValue.target ? newValue.target.value : newValue;
@@ -158,7 +162,7 @@ function MainPage() {
 
       const today = new Date();
       const day = String(today.getDate()).padStart(2, '0');
-      const month = String(today.getMonth() + 1).padStart(2, '0'); 
+      const month = String(today.getMonth() + 1).padStart(2, '0');
       const year = today.getFullYear();
 
       const formattedDate = `${day}-${month}-${year}`;
@@ -189,13 +193,21 @@ function MainPage() {
               Hello, {user ? user.displayName : 'Guest'}
             </Typography>
             <Box display="flex" justifyContent="center" mt={3}>
-              <PrimaryButton text="Health Journal" action={handleJournalClick} state="active" />
+              <PrimaryButton
+                text="Health Journal"
+                action={handleJournalClick}
+                state="active"
+              />
             </Box>
             <br />
-           
-                {testHistory.map(([testDate, testData], index) => (
-          <Box key={index} mb={2} onClick={() => handleTestHistoryClick(testDate)}>
-            <TestHistoryWidget date={testDate} />
+
+            {testHistory.map(([testDate, testData], index) => (
+              <Box
+                key={index}
+                mb={2}
+                onClick={() => handleTestHistoryClick(testDate)}
+              >
+                <TestHistoryWidget date={testDate} />
               </Box>
             ))}
           </>
