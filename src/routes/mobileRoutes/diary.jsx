@@ -3,8 +3,9 @@ import { Box, TextField, Typography, Grid, Paper, Button, MenuItem, Select, Form
 import PrimaryButton from '../../components/widgets/PrimaryButton/PrimaryButton';
 import BackButton from '../../components/widgets/BackButton/BackButton';
 import Cookies from 'js-cookie';
-import { database } from '../../firebase'; // Adjust the path as needed
-import { ref, set, push, onValue, remove } from 'firebase/database';
+import { ref, database } from '../../firebase';
+import { set } from '@firebase/database';
+import { UserAuth } from '../../components/auth/AuthContext';
 
 function HealthJournal() {
   const [journalEntry, setJournalEntry] = useState('');
@@ -12,34 +13,21 @@ function HealthJournal() {
   const [editIndex, setEditIndex] = useState(-1);
   const [filterYear, setFilterYear] = useState('');
   const [uniqueYears, setUniqueYears] = useState([]);
-  const [user, setUser] = useState(null);
+
+  const { user } = UserAuth();
+  const patientID = user.uid;
+  console.log(patientID);
+
 
   useEffect(() => {
-    const storedUser = Cookies.get('currentUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedEntries = Cookies.get('healthJournalEntries');
+    if (storedEntries) {
+      setEntries(JSON.parse(storedEntries));
     }
   }, []);
 
   useEffect(() => {
-    if (user && user.uid) {
-      const journalRef = ref(database, `journal/${user.uid}`);
-      onValue(journalRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const fetchedEntries = Object.keys(data).map(key => ({
-            id: key,
-            ...data[key],
-          }));
-          setEntries(fetchedEntries);
-        } else {
-          setEntries([]);
-        }
-      });
-    }
-  }, [user]);
-
-  useEffect(() => {
+    Cookies.set('healthJournalEntries', JSON.stringify(entries));
     const years = Array.from(new Set(entries.map((entry) => new Date(entry.timestamp).getFullYear())));
     setUniqueYears(years);
   }, [entries]);
@@ -48,39 +36,36 @@ function HealthJournal() {
     setJournalEntry(event.target.value);
   };
 
-  const handleSubmit = () => {
-    if (journalEntry.trim() !== '' && user && user.uid) {
-      const newEntry = {
-        text: journalEntry,
-        timestamp: new Date().toISOString(),
-      };
-      const journalRef = ref(database, `journalEntries/${user.uid}`);
-      push(journalRef, newEntry);
-      setJournalEntry('');
-    }
-  };
+    const handleSubmit = () => {
+        if (journalEntry.trim() !== '') {
+        const newEntry = {
+            text: journalEntry,
+            timestamp: new Date().toLocaleString(),
+        };
+        if (editIndex !== -1) {
+            entries[editIndex] = newEntry;
+            setEditIndex(-1);
+        } else {
+            const newEntries = [...entries, newEntry];
+            setEntries(newEntries);
+            
+            const journalEntriesRef = ref(database, `patients/${patientID}/journalEntries`);
+            set(journalEntriesRef, newEntries);
+        }
+        setJournalEntry('');
+        }
+    };
 
   const handleEdit = (index) => {
     setEditIndex(index);
     setJournalEntry(entries[index].text);
   };
 
-  const handleSaveEdit = () => {
-    if (journalEntry.trim() !== '' && user && user.uid && editIndex !== -1) {
-      const entryId = entries[editIndex].id;
-      const entryRef = ref(database, `journalEntries/${user.uid}/${entryId}`);
-      set(entryRef, { ...entries[editIndex], text: journalEntry, timestamp: new Date().toISOString() });
-      setEditIndex(-1);
-      setJournalEntry('');
-    }
-  };
-
   const handleDelete = (index) => {
-    if (user && user.uid) {
-      const entryId = entries[index].id;
-      const entryRef = ref(database, `journalEntries/${user.uid}/${entryId}`);
-      remove(entryRef);
-    }
+    const updatedEntries = [...entries];
+    updatedEntries.splice(index, 1);
+    setEntries(updatedEntries);
+    setEditIndex(-1);
   };
 
   const handleYearFilterChange = (event) => {
@@ -93,7 +78,7 @@ function HealthJournal() {
 
   const formatDate = (date) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-    return new Date(date).toLocaleDateString('en-US', options);
+    return date.toLocaleDateString('en-US', options);
   };
   const todayDate = formatDate(new Date());
 
@@ -119,7 +104,7 @@ function HealthJournal() {
 
       <PrimaryButton
         text={editIndex !== -1 ? 'Save Edit' : 'Add Entry'}
-        action={editIndex !== -1 ? handleSaveEdit : handleSubmit}
+        action={handleSubmit}
         state={!journalEntry.trim() ? 'disabled' : 'active'}
         size="small"
         sx={{ mb: 3 }}
@@ -144,10 +129,10 @@ function HealthJournal() {
 
       <Grid container>
         {filteredEntries.map((entry, index) => (
-          <Grid item xs={12} key={entry.id}>
+          <Grid item xs={12} key={index}>
             <Paper sx={{ p: 2, backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', mb: 2 }}>
               <Typography variant="subtitle2" sx={{ color: 'gray', mb: 1 }}>
-                {formatDate(entry.timestamp)}
+                {entry.timestamp}
               </Typography>
               <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
                 {entry.text}
