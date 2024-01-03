@@ -8,7 +8,7 @@ import { Container, Typography, Stack, TextField } from '@mui/material';
 import BackButton from '../../components/widgets/BackButton/BackButton';
 import PrimaryButton from '../../components/widgets/PrimaryButton/PrimaryButton';
 import { UserAuth } from '../../components/auth/AuthContext';
-import { database } from '../../firebase';
+
 import { ref, get } from 'firebase/database';
 
 function SignInPage() {

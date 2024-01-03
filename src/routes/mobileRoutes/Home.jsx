@@ -24,11 +24,11 @@ import UserProfile from '../../components/widgets/UserProfile/UserProfile';
 import { UserAuth } from '../../components/auth/AuthContext';
 import PrimaryButton from '../../components/widgets/PrimaryButton/PrimaryButton';
 import ViewProfile from './ViewProfile';
-import { database } from '../../firebase';
-import { ref, set, get } from 'firebase/database';
+import { ref, set, get } from 'firebase/database'; // Import 'ref', 'set', and 'get' here
 import ReviewPage from './ReviewPage';
 import TestHistoryWidget from '../../components/widgets/TestHistoryWidget/TestHistoryWidget';
 import DocBotPage from './DocBotPage';
+import { database } from '../../firebase'; // Import 'database' here
 
 function MainPage() {
   const [value, setValue] = useState('home');
@@ -63,19 +63,6 @@ function MainPage() {
     navigate(`/viewTest/${testDate}`);
   };
 
-  const PrimaryButton = ({ text, action, state }) => {
-    return (
-      <button
-        variant="contained"
-        color="primary"
-        onClick={action}
-        disabled={state !== 'active'}
-      >
-        {text}
-      </button>
-    );
-  };
-
   const iconStyles = {
     fontSize: '35px',
   };
@@ -99,31 +86,6 @@ function MainPage() {
     'Have you experienced any rectal bleeding?',
   ];
 
-  useEffect(() => {
- 
-    if (user && user.uid) {
-      const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
-  
-      get(testHistoryRef)
-        .then((snapshot) => {
-          if (snapshot.exists()) {
-            const testHistoryData = snapshot.val();
-            if (testHistoryData && typeof testHistoryData === 'object') {
-             
-              const testHistoryArray = Object.values(testHistoryData);
-
-              setTestHistory(testHistoryArray);
-            } else {
-              console.error('Test history data is not in the expected format:', testHistoryData);
-            }
-          }
-        })
-        .catch((error) => {
-          console.error('Error fetching test history:', error);
-        });
-    }
-  }, [user]);
-
   const handleAnswerChange = (question, newValue) => {
     const value = newValue.target ? newValue.target.value : newValue;
     setAnswers({ ...answers, [question]: value });
@@ -134,7 +96,10 @@ function MainPage() {
   };
 
   const handleInputChange = (question, event) => {
-    setAnswers({ ...answers, [question]: event.target.value === '' ? 0 : Number(event.target.value) });
+    setAnswers({
+      ...answers,
+      [question]: event.target.value === '' ? 0 : Number(event.target.value),
+    });
   };
 
   const handleBlur = (question) => {
@@ -154,38 +119,36 @@ function MainPage() {
       setSeverity('error');
       return;
     }
-  
+
     const unansweredQuestions = questions.filter(
       (question) => !answers.hasOwnProperty(question)
     );
-  
+
     if (unansweredQuestions.length > 0) {
+      console.log('Question error');
       setErrorMessage('Please answer all questions before submitting.');
       setSeverity('error');
       return;
     }
-  
+
     const today = new Date();
     const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const month = String(today.getMonth() + 1).padStart(2, '0');
     const year = today.getFullYear();
-
     const formattedDate = `${day}-${month}-${year}`;
 
-
-    
     const answersToSave = {};
-  
+
     questions.forEach((question, index) => {
       const answerKey = `Q${index + 1}`;
       const answerValue = answers[question];
       answersToSave[answerKey] = isNaN(answerValue) ? answerValue : parseInt(answerValue, 10);
     });
-  
+
     try {
       const medicalRecordsRef = ref(database, `patients/${user.uid}/medicalRecords/${formattedDate}`);
       await set(medicalRecordsRef, answersToSave);
-  
+
       axios.post('https://predict-app-tmzbdquo3q-lz.a.run.app/predict', { user_uuid: user.uid })
         .then(response => {
           setErrorMessage('Questionnaire submitted successfully and prediction initiated!');
@@ -197,7 +160,6 @@ function MainPage() {
           setErrorMessage('Prediction API call failed. Please try again.');
           setSeverity('error');
         });
-
     } catch (error) {
       console.error('Failed to submit test results:', error);
       setErrorMessage('Failed to submit test results. Please try again.');
