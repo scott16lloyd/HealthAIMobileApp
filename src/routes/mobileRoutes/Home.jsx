@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Grid, FormControl, RadioGroup, Radio, FormControlLabel,
-  Typography, Button, Slider as MuiSlider, Input, // Changed here
+  Box,
+  Grid,
+  FormControl,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
+  Typography,
+  Button,
+  Slider as MuiSlider,
+  Input, // Changed here
   // ... other imports
 } from '@mui/material';
 import RateReviewIcon from '@mui/icons-material/RateReview';
@@ -20,7 +28,7 @@ import { database } from '../../firebase';
 import { ref, set, get } from 'firebase/database';
 import ReviewPage from './ReviewPage';
 import TestHistoryWidget from '../../components/widgets/TestHistoryWidget/TestHistoryWidget';
-
+import DocBotPage from './DocBotPage';
 // ... rest of your code
 
 function MainPage() {
@@ -28,44 +36,47 @@ function MainPage() {
   const { user } = UserAuth();
   const [answers, setAnswers] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
-  const [medicalRecords, setMedicalRecords] = useState([]); 
+  const [testHistory, setTestHistory] = useState([]); 
   const [severity, setSeverity] = useState('success');
 
   const iconStyles = {
     fontSize: '35px',
   };
   const questions = [
-    "Do you smoke regularly?",
-    "Do you consume alcohol often?",
-    "Do you struggle with any other chronic disease?",
-    "Are you a diabetic?",
-    "Do you feel constant fatigue or tiredness?",
-    "Have you undergone any unexpected weight loss?",
-    "Do you experience significant chest pain on a regular basis?",
-    "Have you had any stomach cramps?",
-    "What is your current Blood Pressure? (0-200)",
-    "What is your current Heart Rate? (0-200)",
-    "What is your Cholesterol level? (0-300)",
-    "Are your fingertips a bright yellow?",
-    "Have you experienced a high level of wheezing?",
-    "Have you been coughing excessively?",
-    "Have you been experiencing shortness of breath?",
-    "Have you been experiencing bowel problems?",
-    "Have you experienced any rectal bleeding?",
+    'Do you smoke regularly?',
+    'Do you consume alcohol often?',
+    'Do you struggle with any other chronic disease?',
+    'Are you a diabetic?',
+    'Do you feel constant fatigue or tiredness?',
+    'Have you undergone any unexpected weight loss?',
+    'Do you experience significant chest pain on a regular basis?',
+    'Have you had any stomach cramps?',
+    'What is your current Blood Pressure? (0-200)',
+    'What is your current Heart Rate? (0-200)',
+    'What is your Cholesterol level? (0-300)',
+    'Are your fingertips a bright yellow?',
+    'Have you experienced a high level of wheezing?',
+    'Have you been coughing excessively?',
+    'Have you been experiencing shortness of breath?',
+    'Have you been experiencing bowel problems?',
+    'Have you experienced any rectal bleeding?',
   ];
 
   useEffect(() => {
     if (user && user.uid) {
-      const medicalRecordsRef = ref(database, `patients/${user.uid}/medicalRecords`);
-      get(medicalRecordsRef)
+      const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
+  
+      get(testHistoryRef)
         .then((snapshot) => {
           if (snapshot.exists()) {
-            const recordsData = snapshot.val();
-            if (recordsData && typeof recordsData === 'object') {
-              const recordsArray = Object.values(recordsData);
-              setMedicalRecords(recordsArray);  // Updated state
+            const testHistoryData = snapshot.val();
+            if (testHistoryData && typeof testHistoryData === 'object') {
+             
+              const testHistoryArray = Object.values(testHistoryData);
+
+              setTestHistory(testHistoryArray);
             } else {
-              console.error('Medical records data is not in the expected format:', recordsData);
+              console.error('Test history data is not in the expected format:', testHistoryData);
             }
           }
         })
@@ -85,7 +96,10 @@ function MainPage() {
   };
 
   const handleInputChange = (question, event) => {
-    setAnswers({ ...answers, [question]: event.target.value === '' ? 0 : Number(event.target.value) });
+    setAnswers({
+      ...answers,
+      [question]: event.target.value === '' ? 0 : Number(event.target.value),
+    });
   };
 
   const handleBlur = (question) => {
@@ -102,8 +116,8 @@ function MainPage() {
 
     if (!user || !user.uid) {
       console.error('User not authenticated');
-      setErrorMessage('User not authenticated'); 
-      setSeverity("error");
+      setErrorMessage('User not authenticated');
+      setSeverity('error');
       return;
     }
 
@@ -113,28 +127,27 @@ function MainPage() {
     );
 
     if (unansweredQuestions.length > 0) {
-      console.log("Question error");
+      console.log('Question error');
       setErrorMessage('Please answer all questions before submitting.');
-      setSeverity("error");
+      setSeverity('error');
       return;
     }
-  
-    console.log('Submitting test results for UID:', user.uid); 
-  
-  
+
+    console.log('Submitting test results for UID:', user.uid);
+
     try {
       const answersToSave = {};
-  
+
       questions.forEach((question, index) => {
         const answer = answers[question];
         var Q = 'Q';
         answersToSave[Q + (index + 1)] = answer;
-        console.log(`Question ${index + 1}: ${question}, Answer: ${answer}`); 
+        console.log(`Question ${index + 1}: ${question}, Answer: ${answer}`);
       });
-  
-      console.log('Answers to be saved:', answersToSave); 
- 
-      setAnswers({}); 
+
+      console.log('Answers to be saved:', answersToSave);
+
+      setAnswers({});
 
       const today = new Date();
       const day = String(today.getDate()).padStart(2, '0');
@@ -144,19 +157,20 @@ function MainPage() {
       const formattedDate = `${day}-${month}-${year}`;
       console.log(formattedDate);
 
-      const medicalRecordsRef = ref(database, `patients/${user.uid}/medicalRecords/${formattedDate}`);
+      const medicalRecordsRef = ref(
+        database,
+        `patients/${user.uid}/medicalRecords/${formattedDate}`
+      );
       await set(medicalRecordsRef, answersToSave);
       setErrorMessage('Questionnaire submitted successfully!');
-      setSeverity("success");
+      setSeverity('success');
       console.log('Medical records submitted successfully');
     } catch (error) {
       console.error('Failed to submit test results:', error);
-      setErrorMessage('Failed to submit test results. Please try again.'); 
-      setSeverity("error");
+      setErrorMessage('Failed to submit test results. Please try again.');
+      setSeverity('error');
     }
   };
-  
-  
 
   const renderContent = () => {
     switch (value) {
@@ -167,14 +181,15 @@ function MainPage() {
             <Typography variant="h6" gutterBottom>
               Hello, {user ? user.displayName : 'Guest'}
             </Typography>
-            <Typography variant="subtitle1">How are you feeling today?</Typography>
+            <Typography variant="subtitle1">
+              How are you feeling today?
+            </Typography>
             <Box display="flex" justifyContent="center" mt={3}>
               <Button
                 variant="contained"
                 color="primary"
                 style={{ marginRight: '16px' }}
                 onClick={() => {
-      
                   console.log('Contact Insurance button clicked');
                 }}
               >
@@ -184,104 +199,119 @@ function MainPage() {
                 variant="contained"
                 color="primary"
                 onClick={() => {
-      
                   console.log('Contact GP button clicked');
                 }}
               >
                 Contact GP
               </Button>
             </Box> <br></br>
-            {Array.isArray(medicalRecords) ? (
-              medicalRecords.map((testData, index) => (
+            {Array.isArray(testHistory) ? (
+              testHistory.map((testData, index) => (
                 <Box key={index} mb={2}>
-                <TestHistoryWidget key={index} date={testData.date} />
+                  <TestHistoryWidget key={index} date={testData.date} />
                 </Box>
               ))
             ) : (
-              <Typography variant="subtitle1">Test history data is not available.</Typography>
+              <Typography variant="subtitle1">
+                Test history data is not available.
+              </Typography>
             )}
           </>
         );
 
-        case 'test':
-          return (
-            <div>
-              <Typography variant="h5" gutterBottom>Predict Your Health Results</Typography>
-              <Typography variant="h6" color={'#268AFF'} gutterBottom>
-                Answer these questions to get a prediction about your risk for colon cancer, lung cancer, and heart disease.
-              </Typography>
-              {questions.map((question, index) => {
-                const isSliderQuestion = ['What is your current Blood Pressure? (0-200)', 
-                                          'What is your current Heart Rate? (0-200)', 
-                                          'What is your Cholesterol level? (0-300)'].includes(question);
-                const value = answers[question] || 0;
-        
-                return (
-                  <FormControl key={index} component="fieldset">
-                    <Typography variant="subtitle1">{question}</Typography>
-                    {isSliderQuestion ? (
-                      <Box sx={{ width: 250 }}>
-                        <Grid container spacing={2} alignItems="center">
-                          <Grid item xs>
-                            <MuiSlider
-                              value={typeof value === 'number' ? value : 0}
-                              onChange={(event, newValue) => handleSliderChange(question, newValue)}
-                              aria-labelledby={`input-slider-${index}`}
-                              step={1}
-                              min={0}
-                              max={question.includes('Cholesterol') ? 300 : 200}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <Input
-                              value={value}
-                              size="small"
-                              onChange={(event) => handleInputChange(question, event)}
-                              onBlur={() => handleBlur(question)}
-                              inputProps={{
-                                step: 1,
-                                min: 0,
-                                max: question.includes('Cholesterol') ? 300 : 200,
-                                type: 'number',
-                                'aria-labelledby': `input-slider-${index}`,
-                              }}
-                            />
-                          </Grid>
+      case 'test':
+        return (
+          <div>
+            <Typography variant="h5" gutterBottom>
+              Predict Your Health Results
+            </Typography>
+            <Typography variant="h6" color={'#268AFF'} gutterBottom>
+              Answer these questions to get a prediction about your risk for
+              colon cancer, lung cancer, and heart disease.
+            </Typography>
+            {questions.map((question, index) => {
+              const isSliderQuestion = [
+                'What is your current Blood Pressure? (0-200)',
+                'What is your current Heart Rate? (0-200)',
+                'What is your Cholesterol level? (0-300)',
+              ].includes(question);
+              const value = answers[question] || 0;
+
+              return (
+                <FormControl key={index} component="fieldset">
+                  <Typography variant="subtitle1">{question}</Typography>
+                  {isSliderQuestion ? (
+                    <Box sx={{ width: 250 }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid item xs>
+                          <MuiSlider
+                            value={typeof value === 'number' ? value : 0}
+                            onChange={(event, newValue) =>
+                              handleSliderChange(question, newValue)
+                            }
+                            aria-labelledby={`input-slider-${index}`}
+                            step={1}
+                            min={0}
+                            max={question.includes('Cholesterol') ? 300 : 200}
+                          />
                         </Grid>
-                      </Box>
-                    ) : (
-                      <RadioGroup row onChange={(event) => handleAnswerChange(question, event)}>
-                        <FormControlLabel
-                          value="1"
-                          control={<Radio checked={answers[question] === "1"} />}
-                          label="Yes"
-                        />
-                        <FormControlLabel
-                          value="0"
-                          control={<Radio checked={answers[question] === "0"} />}
-                          label="No"
-                        />
-                      </RadioGroup>
-                    )}
-                  </FormControl>
-                );
-              })}
-              <AlertBox
-                message={errorMessage}
-                severity={severity}
-                onClose={() => setErrorMessage('')}
+                        <Grid item>
+                          <Input
+                            value={value}
+                            size="small"
+                            onChange={(event) =>
+                              handleInputChange(question, event)
+                            }
+                            onBlur={() => handleBlur(question)}
+                            inputProps={{
+                              step: 1,
+                              min: 0,
+                              max: question.includes('Cholesterol') ? 300 : 200,
+                              type: 'number',
+                              'aria-labelledby': `input-slider-${index}`,
+                            }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  ) : (
+                    <RadioGroup
+                      row
+                      onChange={(event) => handleAnswerChange(question, event)}
+                    >
+                      <FormControlLabel
+                        value="1"
+                        control={<Radio checked={answers[question] === '1'} />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="0"
+                        control={<Radio checked={answers[question] === '0'} />}
+                        label="No"
+                      />
+                    </RadioGroup>
+                  )}
+                </FormControl>
+              );
+            })}
+            <AlertBox
+              message={errorMessage}
+              severity={severity}
+              onClose={() => setErrorMessage('')}
+            />
+            <Box display="flex" justifyContent="center" mb={3}>
+              <PrimaryButton
+                text={'Submit Test'}
+                action={handleSubmit}
+                state={'active'}
               />
-              <Box display="flex" justifyContent="center" mb={3}>
-                <PrimaryButton text={'Submit Test'} action={handleSubmit} state={'active'} />
-              </Box>
-            </div>
-          );
-        
-  
-  
+            </Box>
+          </div>
+        );
+
       case 'chat':
-        return <Typography variant="h4">Chat Content</Typography>;
-  
+        return <DocBotPage />;
+
       case 'profile':
         return (
           <>
@@ -289,23 +319,24 @@ function MainPage() {
             <ViewProfile uid={user?.uid} />
           </>
         );
-  
+
       case 'review':
         return (
           <>
             <ReviewPage />
           </>
         );
-  
+
       default:
         return <Typography variant="h4">Page not found</Typography>;
     }
   };
-  
 
   return (
     <>
-      <div style={{ padding: '20px' }}>{renderContent()}</div>
+      <div style={{ padding: '20px', overflow: 'hidden' }}>
+        {renderContent()}
+      </div>
 
       <BottomNavigation
         value={value}
@@ -317,33 +348,32 @@ function MainPage() {
           position: 'fixed',
           bottom: 0,
           zIndex: 1000,
-        
         }}
       >
-         <BottomNavigationAction
+        <BottomNavigationAction
           label="Home"
           value="home"
-          icon={<HomeIcon style={iconStyles} />} 
+          icon={<HomeIcon style={iconStyles} />}
         />
         <BottomNavigationAction
           label="Test"
           value="test"
-          icon={<CheckCircleIcon style={iconStyles} />} 
+          icon={<CheckCircleIcon style={iconStyles} />}
         />
         <BottomNavigationAction
           label="Chat"
           value="chat"
-          icon={<ChatIcon style={iconStyles} />} 
+          icon={<ChatIcon style={iconStyles} />}
         />
         <BottomNavigationAction
           label="Review"
           value="review"
-          icon={<RateReviewIcon style={iconStyles} />} 
+          icon={<RateReviewIcon style={iconStyles} />}
         />
         <BottomNavigationAction
           label="Profile"
           value="profile"
-          icon={<PersonIcon style={iconStyles} />} 
+          icon={<PersonIcon style={iconStyles} />}
         />
       </BottomNavigation>
     </>
