@@ -9,8 +9,7 @@ import {
   Typography,
   Button,
   Slider as MuiSlider,
-  Input, // Changed here
-  // ... other imports
+  Input, 
 } from '@mui/material';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import AlertBox from '../../components/widgets/AlertBox/AlertBox';
@@ -29,7 +28,7 @@ import { ref, set, get } from 'firebase/database';
 import ReviewPage from './ReviewPage';
 import TestHistoryWidget from '../../components/widgets/TestHistoryWidget/TestHistoryWidget';
 import DocBotPage from './DocBotPage';
-// ... rest of your code
+
 
 function MainPage() {
   const [value, setValue] = useState('home');
@@ -121,7 +120,6 @@ function MainPage() {
       return;
     }
 
-    // Check if all questions have been answered
     const unansweredQuestions = questions.filter(
       (question) => !answers.hasOwnProperty(question)
     );
@@ -151,7 +149,7 @@ function MainPage() {
 
       const today = new Date();
       const day = String(today.getDate()).padStart(2, '0');
-      const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+      const month = String(today.getMonth() + 1).padStart(2, '0'); 
       const year = today.getFullYear();
 
       const formattedDate = `${day}-${month}-${year}`;
