@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { auth } from '../../firebase';
+import { auth, database } from '../../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import TopNavigationBar from '../../components/widgets/TopNavigationBar/TopNavigationBar';
@@ -18,8 +18,49 @@ function SignInPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const { user } = UserAuth();
 
-  const signIn = (e) => {
+  // Check if entered email is valid
+  const isEmailValid = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+
+
+  // Code to verify if the user is a patient or a patient
+  async function verifyPatient(emailAddress){
+    var patientCheck = false;
+    const patientsRef = ref(database, 'patients');
+
+    // Function takes in entered email address, before checking it against all users in the patients database
+    return get(patientsRef)
+      .then(snapshot => {
+        const patients = snapshot.val();
+
+        // Check if the email exists in the patients database
+        // If exists, return true, if not, return false
+        patientCheck = Object.values(patients).some(patient => patient.email === emailAddress);
+
+        return patientCheck;
+      })
+      .catch(error => {
+        console.error('Error verifying patient:', error);
+        return patientCheck;
+      });
+    }
+  
+
+  const signIn =  async (e) => {
     e.preventDefault();
+    try{  
+      // Verify patient user
+      var verified = await verifyPatient(email);
+      console.log(verified);
+    } catch(error){
+      console.error("Error check", error);
+    }
+    if (verified == true){
+      // If user is a patient, sign in
+
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Successful sign-in
@@ -36,7 +77,18 @@ function SignInPage() {
           setErrorMessage('An error occurred. Please try again.');
         }
       });
+    } else {
+      // If email is not valid, give error message
+      if(isEmailValid(email) == false){
+        setErrorMessage('Please enter a valid email');
+      }
+      else{
+        // If user email is not found in the patient database, give error message
+        setErrorMessage('This user is not a patient, doctors please use the web app');
+      }
+    }
   };
+  
 
   const checkCompleteProfile = async (user) => {
     const patientsRef = ref(database, `patients/${user.uid}`);
