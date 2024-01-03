@@ -46,7 +46,6 @@ function MainPage() {
           if (snapshot.exists()) {
             const data = snapshot.val();
             setTestHistory(Object.entries(data)); 
-            setTestHistory(Object.entries(data)); 
           }
         })
         .catch((error) => {
@@ -63,7 +62,18 @@ function MainPage() {
     navigate(`/viewTest/${testDate}`);
   };
 
-  
+  const PrimaryButton = ({ text, action, state }) => {
+    return (
+      <button
+        variant="contained"
+        color="primary"
+        onClick={action}
+        disabled={state !== 'active'}
+      >
+        {text}
+      </button>
+    );
+  };
 
   const iconStyles = {
     fontSize: '35px',
@@ -183,10 +193,10 @@ function MainPage() {
               Hello, {user ? user.displayName : 'Guest'}
             </Typography>
             <Box display="flex" justifyContent="center" mt={3}>
-            <PrimaryButton
-                text={"Health Journal"}
-                action={navigate('/diary')}
-                state={"active"}
+              <PrimaryButton
+                text="Health Journal"
+                action={handleJournalClick}
+                state="active"
               />
             </Box>
             <br />
@@ -365,4 +375,3 @@ function MainPage() {
 }
 
 export default MainPage;
-
