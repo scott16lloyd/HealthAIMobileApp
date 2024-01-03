@@ -102,11 +102,13 @@ function ViewTest() {
   useEffect(() => {
     if (user && user.uid && testDate) {
       const testRef = ref(database, `patients/${user.uid}/testHistory/${testDate}`);
-
+  
       get(testRef)
         .then((snapshot) => {
           if (snapshot.exists()) {
-            setTestResults(snapshot.val());
+            const data = snapshot.val();
+            console.log('Data from the database:', data); // Log the data
+            setTestResults(data);
           } else {
             console.log('No test results available for this date.');
           }
@@ -118,6 +120,7 @@ function ViewTest() {
         });
     }
   }, [user, testDate]);
+  
 
   if (loading) {
     return (
@@ -149,25 +152,26 @@ function ViewTest() {
 
 
         <StyledResultCard>
-          <CardImage src={lungImage} alt="Lung Cancer" />
-          <CircularBorder percentage={parseFloat(testResults.Lung)}>
-            <CircularNumber>{testResults.Lung || 'N/A'}</CircularNumber>
-          </CircularBorder>
-          <CardSubtitle variant="subtitle1">Lung Cancer</CardSubtitle>
-        </StyledResultCard>
+  <CardImage src={lungImage} alt="Lung Cancer" />
+  <CircularBorder percentage={parseFloat(testResults.lungResult)}>
+    <CircularNumber>{testResults.lungResult || 'N/A'}</CircularNumber>
+  </CircularBorder>
+  <CardSubtitle variant="subtitle1">Lung Cancer</CardSubtitle>
+</StyledResultCard>
+
 
         <StyledResultCard>
           <CardImage src={heartImage} alt="Heart Disease" />
-          <CircularBorder percentage={parseFloat(testResults.Heart)}>
-            <CircularNumber>{testResults.Heart || 'N/A'}</CircularNumber>
+          <CircularBorder percentage={parseFloat(testResults.heartResult)}>
+            <CircularNumber>{testResults.heartResult || 'N/A'}</CircularNumber>
           </CircularBorder>
           <CardSubtitle variant="subtitle1">Heart Disease</CardSubtitle>
         </StyledResultCard>
 
         <StyledResultCard>
           <CardImage src={colonImage} alt="Colon Cancer" />
-          <CircularBorder percentage={parseFloat(testResults.Colon)}>
-            <CircularNumber>{testResults.Colon || 'N/A'}</CircularNumber>
+          <CircularBorder percentage={parseFloat(testResults.colonResult)}>
+            <CircularNumber>{testResults.colonResult || 'N/A'}</CircularNumber>
           </CircularBorder>
           <CardSubtitle variant="subtitle1">Colon Cancer</CardSubtitle>
         </StyledResultCard>

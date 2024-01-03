@@ -35,7 +35,7 @@ function MainPage() {
         .then((snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.val();
-            setTestHistory(Object.entries(data)); // Changed to entries to get the date keys
+            setTestHistory(Object.entries(data)); 
           }
         })
         .catch((error) => {
