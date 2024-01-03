@@ -90,7 +90,7 @@ def generate_single_patient_data(model_type, patient_data, age, sex):
 
    
     # Extract patient attributes
-    age = patient_data.get("Age", 21)
+    age = patient_data.get("Age", 40)
     sex = patient_data.get("gender")
     gender_numeric = GENDER_MAPPING.get(sex)
 
