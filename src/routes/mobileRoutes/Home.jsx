@@ -12,7 +12,6 @@ import {
   Slider as MuiSlider,
   Input,
 } from '@mui/material';
-import axios from 'axios';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import AlertBox from '../../components/widgets/AlertBox/AlertBox';
 import BottomNavigation from '@mui/material/BottomNavigation';
@@ -47,7 +46,7 @@ function MainPage() {
         .then((snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.val();
-            setTestHistory(Object.entries(data)); // Changed to entries to get the date keys
+            setTestHistory(Object.entries(data));
           }
         })
         .catch((error) => {
@@ -56,25 +55,8 @@ function MainPage() {
     }
   }, [user]);
 
-  const handleJournalClick = () => {
-    navigate('/diary');
-  };
-
   const handleTestHistoryClick = (testDate) => {
     navigate(`/viewTest/${testDate}`);
-  };
-
-  const PrimaryButton = ({ text, action, state }) => {
-    return (
-      <button
-        variant="contained"
-        color="primary"
-        onClick={action}
-        disabled={state !== 'active'}
-      >
-        {text}
-      </button>
-    );
   };
 
   const iconStyles = {
@@ -100,31 +82,6 @@ function MainPage() {
     'Have you experienced any rectal bleeding?',
   ];
 
-  useEffect(() => {
- 
-    if (user && user.uid) {
-      const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
-  
-      get(testHistoryRef)
-        .then((snapshot) => {
-          if (snapshot.exists()) {
-            const testHistoryData = snapshot.val();
-            if (testHistoryData && typeof testHistoryData === 'object') {
-             
-              const testHistoryArray = Object.values(testHistoryData);
-
-              setTestHistory(testHistoryArray);
-            } else {
-              console.error('Test history data is not in the expected format:', testHistoryData);
-            }
-          }
-        })
-        .catch((error) => {
-          console.error('Error fetching test history:', error);
-        });
-    }
-  }, [user]);
-
   const handleAnswerChange = (question, newValue) => {
     const value = newValue.target ? newValue.target.value : newValue;
     setAnswers({ ...answers, [question]: value });
@@ -135,7 +92,10 @@ function MainPage() {
   };
 
   const handleInputChange = (question, event) => {
-    setAnswers({ ...answers, [question]: event.target.value === '' ? 0 : Number(event.target.value) });
+    setAnswers({
+      ...answers,
+      [question]: event.target.value === '' ? 0 : Number(event.target.value),
+    });
   };
 
   const handleBlur = (question) => {
@@ -149,56 +109,57 @@ function MainPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     if (!user || !user.uid) {
       console.error('User not authenticated');
       setErrorMessage('User not authenticated');
       setSeverity('error');
       return;
     }
-  
+
     const unansweredQuestions = questions.filter(
       (question) => !answers.hasOwnProperty(question)
     );
-  
+
     if (unansweredQuestions.length > 0) {
+      console.log('Question error');
       setErrorMessage('Please answer all questions before submitting.');
       setSeverity('error');
       return;
     }
-  
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    const year = today.getFullYear();
 
-    const formattedDate = `${day}-${month}-${year}`;
+    console.log('Submitting test results for UID:', user.uid);
 
-
-    
-    const answersToSave = {};
-  
-    questions.forEach((question, index) => {
-      const answerKey = `Q${index + 1}`;
-      const answerValue = answers[question];
-      answersToSave[answerKey] = isNaN(answerValue) ? answerValue : parseInt(answerValue, 10);
-    });
-  
     try {
-      const medicalRecordsRef = ref(database, `patients/${user.uid}/medicalRecords/${formattedDate}`);
-      await set(medicalRecordsRef, answersToSave);
-  
-      axios.post('https://predict-app-tmzbdquo3q-lz.a.run.app/predict', { user_uuid: user.uid })
-        .then(response => {
-          setErrorMessage('Questionnaire submitted successfully and prediction initiated!');
-          setSeverity('success');
-          setAnswers({}); // Reset answers here
-        })
-        .catch(error => {
-          console.error('Prediction API call failed:', error);
-          setErrorMessage('Prediction API call failed. Please try again.');
-          setSeverity('error');
-        });
+      const answersToSave = {};
 
+      questions.forEach((question, index) => {
+        const answer = answers[question];
+        var Q = 'Q';
+        answersToSave[Q + (index + 1)] = answer;
+        console.log(`Question ${index + 1}: ${question}, Answer: ${answer}`);
+      });
+
+      console.log('Answers to be saved:', answersToSave);
+
+      setAnswers({});
+
+      const today = new Date();
+      const day = String(today.getDate()).padStart(2, '0');
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const year = today.getFullYear();
+
+      const formattedDate = `${day}-${month}-${year}`;
+      console.log(formattedDate);
+
+      const medicalRecordsRef = ref(
+        database,
+        `patients/${user.uid}/medicalRecords/${formattedDate}`
+      );
+      await set(medicalRecordsRef, answersToSave);
+      setErrorMessage('Questionnaire submitted successfully!');
+      setSeverity('success');
+      console.log('Medical records submitted successfully');
     } catch (error) {
       console.error('Failed to submit test results:', error);
       setErrorMessage('Failed to submit test results. Please try again.');
@@ -218,7 +179,7 @@ function MainPage() {
             <Box display="flex" justifyContent="center" mt={3}>
               <PrimaryButton
                 text="Health Journal"
-                action={handleJournalClick}
+                to={'/diary'}
                 state="active"
               />
             </Box>
