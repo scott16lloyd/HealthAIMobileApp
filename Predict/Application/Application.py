@@ -2,111 +2,112 @@ import os
 import pandas as pd
 import numpy as np
 import firebase_admin
-from firebase_admin import credentials, db, auth
+from firebase_admin import credentials, db
 import random
-import requests
 import datetime
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
-random_seed = 42  
-random.seed(random_seed)
-np.random.seed(random_seed)
-
+# Import your prediction modules
 import Colon
 import Heart
 import Lung
 
+
+# Random seed for reproducibility
+random_seed = 42  
+random.seed(random_seed)
+np.random.seed(random_seed)
+
 GENDER_MAPPING = {"M": 0, "F": 1}
 
-#Get the current directory of the script
+# Initialize Firebase
 script_dir = os.path.dirname(os.path.abspath(__file__))
-
-#Construct the path to the service account key file
-path = os.path.join(script_dir, "healthai-40b47-firebase-adminsdk-6kz46-81ac2aa293.json")
-
-#Use the constructed path for Firebase initialization
-cred = credentials.Certificate(path)
+firebase_cred_path = os.path.join(script_dir, "healthai-40b47-firebase-adminsdk-6kz46-81ac2aa293.json")
+cred = credentials.Certificate(firebase_cred_path)
 firebase_admin.initialize_app(cred, {
-    "databaseURL": "https://healthai-40b47-default-rtdb.europe-west1.firebasedatabase.app"}
-    )
+    "databaseURL": "https://healthai-40b47-default-rtdb.europe-west1.firebasedatabase.app"
+})
+
+# Flask app initialization
+app = Flask(__name__)
+CORS(app)
+
+# Train models and get resources
+colon_model, colon_imputer, colon_train_columns = Colon.train_colon_cancer_model()
+heart_model, heart_imputer, heart_train_columns = Heart.train_heart_disease_model()
+lung_model, lung_imputer, lung_train_columns = Lung.train_lung_cancer_model()
 
 
-
-
-def fetch_patient_data(patient_id):
+def fetch_latest_patient_data(patient_id):
     try:
-        #Get the patient entity
-        ref = db.reference(f'patients/{patient_id}')
-        patient_data = ref.get()
+        ref = db.reference(f'patients/{patient_id}/medicalRecords')
+        medical_records = ref.get()
 
-        if patient_data:
-            print("Patient Data Fetched:")
-            print(patient_data)
-            medical_records = patient_data.get("medicalRecords", [])
-            if medical_records:
-                latest_submission = max(medical_records, key=lambda x: x.get("timestamp", 0))
-                return latest_submission
+
+        if medical_records:
+            # Convert dates to datetime objects for sorting in dd-mm-yyyy format
+            sorted_dates = sorted(
+                [datetime.datetime.strptime(k, '%d-%m-%Y') for k in medical_records.keys()],
+                reverse=True
+            )
+            if not sorted_dates:
+                print(f"No medical records found for patient ID {patient_id}")
+                return None
+
+            # Get the latest date's record in dd-mm-yyyy format
+            latest_date = sorted_dates[0].strftime('%d-%m-%Y')
+            latest_record = medical_records.get(latest_date)
+            if latest_record:
+                return latest_record
             else:
-                print(f"Debug: No medical records found for patient ID {patient_id}")
+                print(f"No record found for the latest date: {latest_date}")
                 return None
         else:
-            print(f"Debug: Patient Entity does not exist for ID {patient_id}")
+            print(f"No medical records found for patient ID {patient_id}")
             return None
     except Exception as e:
         print(f"Error fetching patient data: {e}")
         return None
-    
 
 
+def generate_single_patient_data(model_type, patient_data, age, sex):
 
-def generate_single_patient_data(model_type, user_uuid):
-    #Fetch user data from patients table using UUID
-    user_ref = db.reference(f'patients/{user_uuid}')
-    user_data = user_ref.get()
+   
+    # Extract patient attributes
+    age = patient_data.get("Age", 21)
+    sex = patient_data.get("gender")
+    gender_numeric = GENDER_MAPPING.get(sex)
 
-    if not user_data:
-        raise ValueError(f"Patient not found for UUID: {user_uuid}")
 
-    #Extract patient attributes
-    age = user_data.get("Age")
-    sex = user_data.get("gender")
-    
-    #Extract medical records from the list
-    medical_records = user_data.get("medicalRecords", [])
+    # Extract values from the patient data
+    alcohol = patient_data.get("Q2", 0)
+    bowel_problems = patient_data.get("Q16", 0)
+    diabetic = patient_data.get("Q4", 0)
+    rectal_bleeding = patient_data.get("Q17", 0)
+    smoking = patient_data.get("Q1", 0)
+    stomach_cramps = patient_data.get("Q8", 0)
+    tiredness = patient_data.get("Q5", 0)
+    weight_loss = patient_data.get("Q6", 0)
 
-    if not medical_records:
-        raise ValueError(f"No medical records found for UUID: {user_uuid}")
+    bp = patient_data.get("Q9", 0)
+    chest_pain = patient_data.get("Q7", 0)
+    cholesterol = patient_data.get("Q11", 0)
+    max_hr = patient_data.get("Q10", 0)
 
-    #Get the medical record with the highest index ID
-    latest_record = max(medical_records, key=lambda x: x.get("id", 0))
+    chronic_disease = patient_data.get("Q3", 0)
+    coughing = patient_data.get("Q14", 0)
+    fatigue_lung = patient_data.get("Q5", 0)
+    shortness_of_breath = patient_data.get("Q15", 0)
+    swallowing_difficulty = patient_data.get("Q12", 0)
+    wheezing = patient_data.get("Q13", 0)
+    yellow_fingers = patient_data.get("Q12", 0)
 
-    #Extract values from the latest medical record
-    alcohol = latest_record.get("Q2", 0)
-    bowel_problems = latest_record.get("Q16", 0)
-    diabetic = latest_record.get("Q4", 0)
-    rectal_bleeding = latest_record.get("Q17", 0)
-    smoking = latest_record.get("Q1", 0)
-    stomach_cramps = latest_record.get("Q11", 0)
-    tiredness = latest_record.get("Q5", 0)
-    weight_loss = latest_record.get("Q6", 0)
-
-    bp = latest_record.get("Q7", 0)
-    chest_pain = latest_record.get("Q10", 0)
-    cholesterol = latest_record.get("Q9", 0)
-    max_hr = latest_record.get("Q8", 0)
-
-    chronic_disease = latest_record.get("Q3", 0)
-    coughing = latest_record.get("Q14", 0)
-    fatigue_lung = latest_record.get("Q5", 0)
-    shortness_of_breath = latest_record.get("Q15", 0)
-    swallowing_difficulty = latest_record.get("Q12", 0)
-    wheezing = latest_record.get("Q13", 0)
-    yellow_fingers = latest_record.get("Q12", 0)
-
-    #Create patient data based on model type
+    # Create patient data based on model type
     if model_type == 'colon':
         return {
             'Age': age,
-            'Sex': GENDER_MAPPING.get(sex, 0),
+            'Sex': gender_numeric,
             'Alcohol': alcohol,
             'Bowel Problems': bowel_problems,
             'Diabetic': diabetic,
@@ -119,17 +120,16 @@ def generate_single_patient_data(model_type, user_uuid):
     elif model_type == 'heart':
         return {
             'Age': age,
-            'Sex': GENDER_MAPPING.get(sex, 0),
+            'Sex': gender_numeric,
             'BP': bp,
             'Chest pain type': chest_pain,
             'Cholesterol': cholesterol,
             'Max HR': max_hr,
         }
-    
     elif model_type == 'lung':
         return {
             'AGE': age,
-            'GENDER': GENDER_MAPPING.get(sex, 0),
+            'GENDER': gender_numeric,
             'ALCOHOL CONSUMING': alcohol,
             'CHEST PAIN': chest_pain,
             'CHRONIC DISEASE': chronic_disease,
@@ -143,86 +143,77 @@ def generate_single_patient_data(model_type, user_uuid):
         }
     else:
         raise ValueError(f"Invalid model_type: {model_type}")
+    
 
     
 
 def add_predict_info_to_firebase(predict_info, uid):
-
     current_date = datetime.datetime.now().strftime("%d-%m-%Y")
- 
-    # Get a reference to the 'patients' node in the Firebase Realtime Database
     patients_ref = db.reference(f'patients/{uid}/testResults/{current_date}')
-
-    # Update the prediction results under the specified UID within the 'patients' node
     patients_ref.update(predict_info)
 
 
+# Flask route for prediction
+@app.route('/predict', methods=['POST'])
+def predict():
+    data = request.json
+    user_uuid = data.get('user_uuid')
 
-if __name__ == "__main__":
-   
-    current_user = auth.current_user()
-    user_uuid = current_user.uid
+    if not user_uuid:
+        return jsonify({'error': 'User UUID is required'}), 400
 
-    
-    #Generate patient data for colon model
-    single_patient_data_colon = generate_single_patient_data('colon', user_uuid)
+    # Fetch patient's age and gender
+    patient_ref = db.reference(f'patients/{user_uuid}')
+    patient_info = patient_ref.get()
+    if patient_info:
+        patient_age = patient_info.get("Age")
+        patient_gender = patient_info.get("gender")
+    else:
+        return jsonify({'error': 'Patient info not found'}), 404
 
-    #Train the colon cancer model
-    colon_model, colon_imputer, train_columns_colon = Colon.train_colon_cancer_model()
+    latest_patient_data = fetch_latest_patient_data(user_uuid)
 
-    print("Input Data for Colon Prediction:")
-    print(pd.DataFrame([single_patient_data_colon]))
+    if not latest_patient_data:
+        return jsonify({'error': 'No patient data found'}), 404
 
-    #Predict colon cancer
-    colon_result, colon_probability = Colon.predict_colon_cancer(pd.DataFrame([single_patient_data_colon]), colon_model, colon_imputer, GENDER_MAPPING, train_columns_colon)
+    # Prediction logic for each model
+    patient_data_colon = generate_single_patient_data('colon', latest_patient_data, patient_age, patient_gender)
+    colon_result, colon_probability = Colon.predict_colon_cancer(
+        pd.DataFrame([patient_data_colon]),
+        colon_model,
+        colon_imputer,
+        GENDER_MAPPING,
+        colon_train_columns
+    )
 
-    #Print results with risk percentage
-    print("\nColon Cancer Data:")
-    #print("Colon Result (Probability of Positive Class):", colon_result[0])
-    print("Colon Risk Percentage:", int(colon_probability[0] * 100))
+    patient_data_heart = generate_single_patient_data('heart', latest_patient_data, patient_age, patient_gender)
+    heart_result, heart_probability = Heart.predict_heart_disease(
+        pd.DataFrame([patient_data_heart]),
+        heart_model,
+        heart_imputer,
+        GENDER_MAPPING,
+        heart_train_columns
+    )
 
-    #Generate patient data for heart model
-    single_patient_data_heart = generate_single_patient_data('heart', user_uuid)
+    patient_data_lung = generate_single_patient_data('lung', latest_patient_data, patient_age, patient_gender)
+    lung_result, lung_probability = Lung.predict_lung_cancer(
+        pd.DataFrame([patient_data_lung]),
+        lung_model,
+        lung_imputer,
+        GENDER_MAPPING
+    )
 
-    #Train the heart disease model
-    heart_model, heart_imputer, train_columns_heart = Heart.train_heart_disease_model()
-
-    print("\nInput Data for Heart Disease Prediction:")
-    print(pd.DataFrame([single_patient_data_heart]))
-
-    #Predict heart disease
-    heart_result, heart_probability = Heart.predict_heart_disease(pd.DataFrame([single_patient_data_heart]), heart_model, heart_imputer, GENDER_MAPPING, train_columns_heart)
-
-    #Print results with risk percentage
-    print("\nHeart Disease Data:")
-    print("Heart Risk Percentage:", int(heart_probability[0] * 100))
-
-    #Generate patient data for lung model
-    single_patient_data_lung = generate_single_patient_data('lung', user_uuid)
-
-    #Train the lung cancer model
-    lung_model, lung_imputer, train_columns_lung = Lung.train_lung_cancer_model()
-
-    print("\nInput Data for Lung Prediction:")
-    print(pd.DataFrame([single_patient_data_lung]))
-
-    #Predict lung cancer
-    lung_result, lung_probability = Lung.predict_lung_cancer(pd.DataFrame([single_patient_data_lung]), lung_model, lung_imputer, GENDER_MAPPING)
-
-    #Print results with risk percentage
-    print("\nLung Cancer Data:")
-    #print("Lung Result (Probability of Positive Class):", lung_result[0])
-    print("Lung Risk Percentage:", int(lung_probability[0] * 100))
-
-
-    # Create a dictionary with prediction results
+    # Compile the prediction results
     predict_info = {
         'colonResult': int(colon_probability[0] * 100),
         'heartResult': int(heart_probability[0] * 100),
         'lungResult': int(lung_probability[0] * 100)
     }
 
-    # Update the Firebase database with the prediction results
+    # Update Firebase with the prediction results
     add_predict_info_to_firebase(predict_info, user_uuid)
 
-    
+    return jsonify(predict_info)
+
+if __name__ == '__main__':
+    app.run(debug=True)

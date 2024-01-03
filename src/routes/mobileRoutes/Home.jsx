@@ -4,6 +4,7 @@ import {
   Typography, Button, Slider as MuiSlider, Input, // Changed here
   // ... other imports
 } from '@mui/material';
+import axios from 'axios';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import AlertBox from '../../components/widgets/AlertBox/AlertBox';
 import BottomNavigation from '@mui/material/BottomNavigation';
@@ -103,60 +104,58 @@ function MainPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     if (!user || !user.uid) {
       console.error('User not authenticated');
-      setErrorMessage('User not authenticated'); 
-      setSeverity("error");
+      setErrorMessage('User not authenticated');
+      setSeverity('error');
       return;
     }
-
-    // Check if all questions have been answered
+  
     const unansweredQuestions = questions.filter(
       (question) => !answers.hasOwnProperty(question)
     );
-
+  
     if (unansweredQuestions.length > 0) {
-      console.log("Question error");
       setErrorMessage('Please answer all questions before submitting.');
-      setSeverity("error");
+      setSeverity('error');
       return;
     }
   
-    console.log('Submitting test results for UID:', user.uid); 
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = today.getFullYear();
+
+    const formattedDate = `${day}-${month}-${year}`;
+
+
+    
+    const answersToSave = {};
   
+    questions.forEach((question, index) => {
+      const answerKey = `Q${index + 1}`;
+      const answerValue = answers[question];
+      answersToSave[answerKey] = isNaN(answerValue) ? answerValue : parseInt(answerValue, 10);
+    });
   
     try {
-      const answersToSave = {};
-  
-      questions.forEach((question, index) => {
-        const answer = answers[question];
-        var Q = 'Q';
-        answersToSave[Q + (index + 1)] = answer;
-        console.log(`Question ${index + 1}: ${question}, Answer: ${answer}`); 
-      });
-  
-      console.log('Answers to be saved:', answersToSave); 
- 
-      setAnswers({}); 
-
-      const today = new Date();
-      const day = String(today.getDate()).padStart(2, '0');
-      const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-      const year = today.getFullYear();
-
-      const formattedDate = `${day}-${month}-${year}`;
-      console.log(formattedDate);
-
       const medicalRecordsRef = ref(database, `patients/${user.uid}/medicalRecords/${formattedDate}`);
       await set(medicalRecordsRef, answersToSave);
-      setErrorMessage('Questionnaire submitted successfully!');
-      setSeverity("success");
-      console.log('Medical records submitted successfully');
+  
+      axios.post('http://localhost:5000/predict', { user_uuid: user.uid })
+        .then(response => {
+          setErrorMessage('Questionnaire submitted successfully and prediction initiated!');
+          setSeverity('success');
+        })
+        .catch(error => {
+          console.error('Prediction API call failed:', error);
+          setErrorMessage('Prediction API call failed. Please try again.');
+          setSeverity('error');
+        });
     } catch (error) {
       console.error('Failed to submit test results:', error);
-      setErrorMessage('Failed to submit test results. Please try again.'); 
-      setSeverity("error");
+      setErrorMessage('Failed to submit test results. Please try again.');
+      setSeverity('error');
     }
   };
   
