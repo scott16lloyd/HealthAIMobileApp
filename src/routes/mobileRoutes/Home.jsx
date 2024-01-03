@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-  Box, Grid, FormControl, RadioGroup, Radio, FormControlLabel,
-  Typography, Button, Slider as MuiSlider, Input, // Changed here
-  // ... other imports
+  Box,
+  Grid,
+  FormControl,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
+  Typography,
+  Slider as MuiSlider,
+  Input,
 } from '@mui/material';
 import axios from 'axios';
 import RateReviewIcon from '@mui/icons-material/RateReview';
@@ -21,38 +28,75 @@ import { database } from '../../firebase';
 import { ref, set, get } from 'firebase/database';
 import ReviewPage from './ReviewPage';
 import TestHistoryWidget from '../../components/widgets/TestHistoryWidget/TestHistoryWidget';
-
-// ... rest of your code
+import DocBotPage from './DocBotPage';
 
 function MainPage() {
   const [value, setValue] = useState('home');
   const { user } = UserAuth();
   const [answers, setAnswers] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
-  const [testHistory, setTestHistory] = useState([]); 
+  const [testHistory, setTestHistory] = useState([]);
   const [severity, setSeverity] = useState('success');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && user.uid) {
+      const testHistoryRef = ref(database, `patients/${user.uid}/testHistory`);
+      get(testHistoryRef)
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            setTestHistory(Object.entries(data)); // Changed to entries to get the date keys
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching test history:', error);
+        });
+    }
+  }, [user]);
+
+  const handleJournalClick = () => {
+    navigate('/diary');
+  };
+
+  const handleTestHistoryClick = (testDate) => {
+    navigate(`/viewTest/${testDate}`);
+  };
+
+  const PrimaryButton = ({ text, action, state }) => {
+    return (
+      <button
+        variant="contained"
+        color="primary"
+        onClick={action}
+        disabled={state !== 'active'}
+      >
+        {text}
+      </button>
+    );
+  };
 
   const iconStyles = {
     fontSize: '35px',
   };
   const questions = [
-    "Do you smoke regularly?",
-    "Do you consume alcohol often?",
-    "Do you struggle with any other chronic disease?",
-    "Are you a diabetic?",
-    "Do you feel constant fatigue or tiredness?",
-    "Have you undergone any unexpected weight loss?",
-    "Do you experience significant chest pain on a regular basis?",
-    "Have you had any stomach cramps?",
-    "What is your current Blood Pressure? (0-200)",
-    "What is your current Heart Rate? (0-200)",
-    "What is your Cholesterol level? (0-300)",
-    "Are your fingertips a bright yellow?",
-    "Have you experienced a high level of wheezing?",
-    "Have you been coughing excessively?",
-    "Have you been experiencing shortness of breath?",
-    "Have you been experiencing bowel problems?",
-    "Have you experienced any rectal bleeding?",
+    'Do you smoke regularly?',
+    'Do you consume alcohol often?',
+    'Do you struggle with any other chronic disease?',
+    'Are you a diabetic?',
+    'Do you feel constant fatigue or tiredness?',
+    'Have you undergone any unexpected weight loss?',
+    'Do you experience significant chest pain on a regular basis?',
+    'Have you had any stomach cramps?',
+    'What is your current Blood Pressure? (0-200)',
+    'What is your current Heart Rate? (0-200)',
+    'What is your Cholesterol level? (0-300)',
+    'Are your fingertips a bright yellow?',
+    'Have you experienced a high level of wheezing?',
+    'Have you been coughing excessively?',
+    'Have you been experiencing shortness of breath?',
+    'Have you been experiencing bowel problems?',
+    'Have you experienced any rectal bleeding?',
   ];
 
   useEffect(() => {
@@ -160,8 +204,6 @@ function MainPage() {
       setSeverity('error');
     }
   };
-  
-  
 
   const renderContent = () => {
     switch (value) {
@@ -172,121 +214,120 @@ function MainPage() {
             <Typography variant="h6" gutterBottom>
               Hello, {user ? user.displayName : 'Guest'}
             </Typography>
-            <Typography variant="subtitle1">How are you feeling today?</Typography>
             <Box display="flex" justifyContent="center" mt={3}>
-              <Button
-                variant="contained"
-                color="primary"
-                style={{ marginRight: '16px' }}
-                onClick={() => {
-      
-                  console.log('Contact Insurance button clicked');
-                }}
+              <PrimaryButton
+                text="Health Journal"
+                action={handleJournalClick}
+                state="active"
+              />
+            </Box>
+            <br />
+
+            {testHistory.map(([testDate, testData], index) => (
+              <Box
+                key={index}
+                mb={2}
+                onClick={() => handleTestHistoryClick(testDate)}
               >
-                Contact Insurance
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-      
-                  console.log('Contact GP button clicked');
-                }}
-              >
-                Contact GP
-              </Button>
-            </Box> <br></br>
-            {Array.isArray(testHistory) ? (
-              testHistory.map((testData, index) => (
-                <Box key={index} mb={2}>
-                <TestHistoryWidget key={index} date={testData.date} />
-                </Box>
-              ))
-            ) : (
-              <Typography variant="subtitle1">Test history data is not available.</Typography>
-            )}
+                <TestHistoryWidget date={testDate} />
+              </Box>
+            ))}
           </>
         );
 
-        case 'test':
-          return (
-            <div>
-              <Typography variant="h5" gutterBottom>Predict Your Health Results</Typography>
-              <Typography variant="h6" color={'#268AFF'} gutterBottom>
-                Answer these questions to get a prediction about your risk for colon cancer, lung cancer, and heart disease.
-              </Typography>
-              {questions.map((question, index) => {
-                const isSliderQuestion = ['What is your current Blood Pressure? (0-200)', 
-                                          'What is your current Heart Rate? (0-200)', 
-                                          'What is your Cholesterol level? (0-300)'].includes(question);
-                const value = answers[question] || 0;
-        
-                return (
-                  <FormControl key={index} component="fieldset">
-                    <Typography variant="subtitle1">{question}</Typography>
-                    {isSliderQuestion ? (
-                      <Box sx={{ width: 250 }}>
-                        <Grid container spacing={2} alignItems="center">
-                          <Grid item xs>
-                            <MuiSlider
-                              value={typeof value === 'number' ? value : 0}
-                              onChange={(event, newValue) => handleSliderChange(question, newValue)}
-                              aria-labelledby={`input-slider-${index}`}
-                              step={1}
-                              min={0}
-                              max={question.includes('Cholesterol') ? 300 : 200}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <Input
-                              value={value}
-                              size="small"
-                              onChange={(event) => handleInputChange(question, event)}
-                              onBlur={() => handleBlur(question)}
-                              inputProps={{
-                                step: 1,
-                                min: 0,
-                                max: question.includes('Cholesterol') ? 300 : 200,
-                                type: 'number',
-                                'aria-labelledby': `input-slider-${index}`,
-                              }}
-                            />
-                          </Grid>
+      case 'test':
+        return (
+          <div>
+            <Typography variant="h5" gutterBottom>
+              Predict Your Health Results
+            </Typography>
+            <Typography variant="h6" color={'#268AFF'} gutterBottom>
+              Answer these questions to get a prediction about your risk for
+              colon cancer, lung cancer, and heart disease.
+            </Typography>
+            {questions.map((question, index) => {
+              const isSliderQuestion = [
+                'What is your current Blood Pressure? (0-200)',
+                'What is your current Heart Rate? (0-200)',
+                'What is your Cholesterol level? (0-300)',
+              ].includes(question);
+              const value = answers[question] || 0;
+
+              return (
+                <FormControl key={index} component="fieldset">
+                  <Typography variant="subtitle1">{question}</Typography>
+                  {isSliderQuestion ? (
+                    <Box sx={{ width: 250 }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid item xs>
+                          <MuiSlider
+                            value={typeof value === 'number' ? value : 0}
+                            onChange={(event, newValue) =>
+                              handleSliderChange(question, newValue)
+                            }
+                            aria-labelledby={`input-slider-${index}`}
+                            step={1}
+                            min={0}
+                            max={question.includes('Cholesterol') ? 300 : 200}
+                          />
                         </Grid>
-                      </Box>
-                    ) : (
-                      <RadioGroup row onChange={(event) => handleAnswerChange(question, event)}>
-                        <FormControlLabel
-                          value="1"
-                          control={<Radio checked={answers[question] === "1"} />}
-                          label="Yes"
-                        />
-                        <FormControlLabel
-                          value="0"
-                          control={<Radio checked={answers[question] === "0"} />}
-                          label="No"
-                        />
-                      </RadioGroup>
-                    )}
-                  </FormControl>
-                );
-              })}
-              <AlertBox
-                message={errorMessage}
-                severity={severity}
-                onClose={() => setErrorMessage('')}
+                        <Grid item>
+                          <Input
+                            value={value}
+                            size="small"
+                            onChange={(event) =>
+                              handleInputChange(question, event)
+                            }
+                            onBlur={() => handleBlur(question)}
+                            inputProps={{
+                              step: 1,
+                              min: 0,
+                              max: question.includes('Cholesterol') ? 300 : 200,
+                              type: 'number',
+                              'aria-labelledby': `input-slider-${index}`,
+                            }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  ) : (
+                    <RadioGroup
+                      row
+                      onChange={(event) => handleAnswerChange(question, event)}
+                    >
+                      <FormControlLabel
+                        value="1"
+                        control={<Radio checked={answers[question] === '1'} />}
+                        label="Yes"
+                      />
+                      <FormControlLabel
+                        value="0"
+                        control={<Radio checked={answers[question] === '0'} />}
+                        label="No"
+                      />
+                    </RadioGroup>
+                  )}
+                </FormControl>
+              );
+            })}
+            <AlertBox
+              message={errorMessage}
+              severity={severity}
+              onClose={() => setErrorMessage('')}
+            />
+            <Box display="flex" justifyContent="center" mb={3}>
+              <PrimaryButton
+                text={'Submit Test'}
+                action={handleSubmit}
+                state={'active'}
               />
-              <Box display="flex" justifyContent="center" mb={3}>
-                <PrimaryButton text={'Submit Test'} action={handleSubmit} state={'active'} />
-              </Box>
-            </div>
-          );
-        
-  
-  
+            </Box>
+          </div>
+        );
+
       case 'chat':
-        return <Typography variant="h4">Chat Content</Typography>;
-  
+        return <DocBotPage />;
+
       case 'profile':
         return (
           <>
@@ -294,23 +335,24 @@ function MainPage() {
             <ViewProfile uid={user?.uid} />
           </>
         );
-  
+
       case 'review':
         return (
           <>
             <ReviewPage />
           </>
         );
-  
+
       default:
         return <Typography variant="h4">Page not found</Typography>;
     }
   };
-  
 
   return (
     <>
-      <div style={{ padding: '20px' }}>{renderContent()}</div>
+      <div style={{ padding: '20px', overflow: 'hidden' }}>
+        {renderContent()}
+      </div>
 
       <BottomNavigation
         value={value}
@@ -322,33 +364,32 @@ function MainPage() {
           position: 'fixed',
           bottom: 0,
           zIndex: 1000,
-        
         }}
       >
-         <BottomNavigationAction
+        <BottomNavigationAction
           label="Home"
           value="home"
-          icon={<HomeIcon style={iconStyles} />} 
+          icon={<HomeIcon style={iconStyles} />}
         />
         <BottomNavigationAction
           label="Test"
           value="test"
-          icon={<CheckCircleIcon style={iconStyles} />} 
+          icon={<CheckCircleIcon style={iconStyles} />}
         />
         <BottomNavigationAction
           label="Chat"
           value="chat"
-          icon={<ChatIcon style={iconStyles} />} 
+          icon={<ChatIcon style={iconStyles} />}
         />
         <BottomNavigationAction
           label="Review"
           value="review"
-          icon={<RateReviewIcon style={iconStyles} />} 
+          icon={<RateReviewIcon style={iconStyles} />}
         />
         <BottomNavigationAction
           label="Profile"
           value="profile"
-          icon={<PersonIcon style={iconStyles} />} 
+          icon={<PersonIcon style={iconStyles} />}
         />
       </BottomNavigation>
     </>

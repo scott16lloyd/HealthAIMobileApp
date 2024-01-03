@@ -10,6 +10,7 @@ import {
   InputAdornment,
   IconButton,
 } from '@mui/material';
+import { ThreeDots } from 'react-loader-spinner';
 
 function DocBotPage() {
   // Styles
@@ -26,6 +27,7 @@ function DocBotPage() {
     alignItems: 'center',
     justifyContent: 'flex-start',
     flexShrink: 0,
+    overflow: 'hidden',
   };
 
   const stageStyle = {
@@ -42,7 +44,6 @@ function DocBotPage() {
     flexDirection: 'column',
     width: '100%',
     flex: 1,
-    justifyContent: 'space-between',
     overflow: 'hidden',
   };
 
@@ -63,7 +64,7 @@ function DocBotPage() {
   const inputStyle = {
     width: '85%',
     position: 'absolute',
-    bottom: '2rem',
+    bottom: '5rem',
     borderRadius: '5px',
     background:
       'linear-gradient(93deg, rgba(217, 217, 217, 0.40) 17.46%, rgba(217, 217, 217, 0.10) 82.78%)',
@@ -73,7 +74,8 @@ function DocBotPage() {
 
   const botMessageBubble = {
     backgroundColor: 'rgba(0, 117, 255, 0.4)',
-    width: '75%',
+    width: 'max-content',
+    maxWidth: '75%',
     padding: '0.3rem',
     justifyContent: 'flex-start',
   };
@@ -94,10 +96,12 @@ function DocBotPage() {
   const [messages, setMessages] = useState([
     {
       type: 'bot',
-      content: 'Hello, I am the DocBot. Ask me a question or tell me a symptom and I will try my best to recommend a solution.',
+      content:
+        'Hello, I am the DocBot. Ask me a question or tell me a symptom and I will try my best to recommend a solution.',
     },
   ]);
   const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Chat window ref for auto-scrolling
   const chatWindowRef = React.useRef(null);
@@ -108,36 +112,42 @@ function DocBotPage() {
   }, [messages]);
 
   // Function to handle sending message
-  const handleSend = () => {
+  const handleSend = (e) => {
+    e.preventDefault();
+
     if (input.trim() !== '') {
       // Add user message to chat
       setMessages([...messages, { type: 'user', content: input }]);
-  
-      
-      axios.post('https://docbot-image-tmzbdquo3q-lz.a.run.app/post', { user_input: input })
-        .then(response => {
-          // Add bot response to chat
-          setMessages(prev => [...prev, { type: 'bot', content: response.data.response }]);
+
+      // Set loading state to true
+      setLoading(true);
+
+      axios
+        .post('https://docbot-image-tmzbdquo3q-lz.a.run.app/post', {
+          user_input: input,
         })
-        .catch(error => console.error('Error:', error));
-  
+        .then((response) => {
+          // Add bot response to chat
+          setMessages((prev) => [
+            ...prev,
+            { type: 'bot', content: response.data.response },
+          ]);
+          // Set loading state to false
+          setLoading(false);
+        })
+        .catch((error) => console.error('Error:', error));
+
       // Clear input field
       setInput('');
     }
   };
-  
 
   return (
     <>
       <div style={outerWrapper}>
         <div style={topBarStyle}>
           {user ? <UserProfile /> : null}
-          <Typography variant="h5" style={{ fontSize: 25 }}>
-            Hello,
-            <Typography variant="h4" style={{ fontWeight: 600 }}>
-              {user.displayName ? user.displayName : 'User'}
-            </Typography>
-          </Typography>
+          
         </div>
         <div style={stageStyle}>
           <Typography variant="h4">Welcome to DocBot</Typography>
@@ -146,7 +156,9 @@ function DocBotPage() {
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={message.type === 'bot' ? 'botMessage' : 'userMessage'}
+                  className={
+                    message.type === 'bot' ? 'botMessage' : 'userMessage'
+                  }
                   style={{ display: 'flex', flexDirection: 'row' }}
                 >
                   <Paper
@@ -161,26 +173,48 @@ function DocBotPage() {
                   </Paper>
                 </div>
               ))}
+              {/* Displays loading animation when waiting for response */}
+              {loading && (
+                <div
+                  className="loadingMessage"
+                  style={{ display: 'flex', flexDirection: 'row' }}
+                >
+                  <Paper elevation={2} style={botMessageBubble}>
+                    <ThreeDots
+                      visible={true}
+                      height="50"
+                      width="50"
+                      color="black"
+                      radius="9"
+                      ariaLabel="three-dots-loading"
+                      wrapperStyle={{}}
+                      wrapperClass=""
+                    />
+                  </Paper>
+                </div>
+              )}
               <div ref={chatWindowRef} />
             </Paper>
-            <TextField
-              variant="filled"
-              style={inputStyle}
-              required
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton size="large" onClick={handleSend}>
-                      <ArrowForwardIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                disableUnderline: true,
-              }}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Start Typing ...."
-            />
+            <form onSubmit={handleSend}>
+              <TextField
+                variant="filled"
+                style={inputStyle}
+                required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton size="large" onClick={handleSend}>
+                        <ArrowForwardIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                  disableUnderline: true,
+                }}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Start Typing ...."
+              />
+            </form>
           </div>
         </div>
       </div>
