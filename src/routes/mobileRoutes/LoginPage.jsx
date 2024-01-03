@@ -8,8 +8,8 @@ import { Container, Typography, Stack, TextField } from '@mui/material';
 import BackButton from '../../components/widgets/BackButton/BackButton';
 import PrimaryButton from '../../components/widgets/PrimaryButton/PrimaryButton';
 import { UserAuth } from '../../components/auth/AuthContext';
+import { database } from '../../firebase';
 import { ref, get } from 'firebase/database';
-
 
 function SignInPage() {
   const [email, setEmail] = useState('');
@@ -62,11 +62,10 @@ function SignInPage() {
       // If user is a patient, sign in
 
     signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
+      .then((userCredential) => {
         // Successful sign-in
         console.log('Sign-in successful');
         // Navigate to home or do other actions upon successful sign-in
-        navigate('/home');
       })
       .catch((error) => {
         console.log(error);
@@ -91,8 +90,29 @@ function SignInPage() {
   };
   
 
+  const checkCompleteProfile = async (user) => {
+    const patientsRef = ref(database, `patients/${user.uid}`);
+    console.log(patientsRef);
+    try {
+      const userSnapshot = await get(patientsRef);
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.val();
+        console.log(userData);
+        if (!userData.insuranceProvider) {
+          navigate('/mobileInsuranceDetails');
+        } else if (userData.subscribed === false) {
+          navigate('/mobilePlanSelection');
+        } else {
+          navigate('/home');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
   useEffect(() => {
-    if (user != null) {
+    if (user != null && checkCompleteProfile(user)) {
       navigate('/home');
     }
   });
@@ -142,9 +162,13 @@ function SignInPage() {
         onClose={() => setErrorMessage('')}
       />
       <Container>
-        <div style={{ display: 'flex', alignItems: 'center', marginTop: '0.5rem' }}>
+        <div
+          style={{ display: 'flex', alignItems: 'center', marginTop: '0.5rem' }}
+        >
           <BackButton style={backButtonStyle} goBackPath={'/'} />
-          <Typography variant="h5" paddingLeft={'35px'}>Login</Typography>
+          <Typography variant="h5" paddingLeft={'35px'}>
+            Login
+          </Typography>
           <span style={spaceStyle}></span>
         </div>
         <Stack direction="row" spacing={2} justifyContent="center">
@@ -173,7 +197,12 @@ function SignInPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <PrimaryButton text={'Login'} type="submit" action={signIn} state={'active'} />{' '}
+            <PrimaryButton
+              text={'Login'}
+              type="submit"
+              action={signIn}
+              state={'active'}
+            />{' '}
             <div style={troubleLoggingInSectionStyle}>
               Trouble logging in?{' '}
               <Link to="/help" style={{ textDecoration: 'underline' }}>
@@ -183,7 +212,6 @@ function SignInPage() {
           </div>
         </Stack>
       </Container>
-
     </>
   );
 }
