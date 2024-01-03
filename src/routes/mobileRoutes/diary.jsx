@@ -3,6 +3,9 @@ import { Box, TextField, Typography, Grid, Paper, Button, MenuItem, Select, Form
 import PrimaryButton from '../../components/widgets/PrimaryButton/PrimaryButton';
 import BackButton from '../../components/widgets/BackButton/BackButton';
 import Cookies from 'js-cookie';
+import { ref, database } from '../../firebase';
+import { set } from '@firebase/database';
+import { UserAuth } from '../../components/auth/AuthContext';
 
 function HealthJournal() {
   const [journalEntry, setJournalEntry] = useState('');
@@ -10,14 +13,11 @@ function HealthJournal() {
   const [editIndex, setEditIndex] = useState(-1);
   const [filterYear, setFilterYear] = useState('');
   const [uniqueYears, setUniqueYears] = useState([]);
-  const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const storedUser = Cookies.get('currentUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  const { user } = UserAuth();
+  const patientID = user.uid;
+  console.log(patientID);
+
 
   useEffect(() => {
     const storedEntries = Cookies.get('healthJournalEntries');
@@ -36,21 +36,28 @@ function HealthJournal() {
     setJournalEntry(event.target.value);
   };
 
-  const handleSubmit = () => {
-    if (journalEntry.trim() !== '') {
-      const newEntry = {
-        text: journalEntry,
-        timestamp: new Date().toLocaleString(),
-      };
-      if (editIndex !== -1) {
-        entries[editIndex] = newEntry;
-        setEditIndex(-1);
-      } else {
-        setEntries([...entries, newEntry]);
-      }
-      setJournalEntry('');
-    }
-  };
+    const handleSubmit = () => {
+        if (journalEntry.trim() !== '') {
+        const newEntry = {
+            text: journalEntry,
+            timestamp: new Date().toLocaleString(),
+        };
+        if (editIndex !== -1) {
+            // If editing an existing entry
+            entries[editIndex] = newEntry;
+            setEditIndex(-1);
+        } else {
+            // If adding a new entry
+            const newEntries = [...entries, newEntry];
+            setEntries(newEntries);
+
+            // Push the new entry to Firebase
+            const journalEntriesRef = ref(database, `patients/${patientID}/journalEntries`);
+            set(journalEntriesRef, newEntries);
+        }
+        setJournalEntry('');
+        }
+    };
 
   const handleEdit = (index) => {
     setEditIndex(index);
