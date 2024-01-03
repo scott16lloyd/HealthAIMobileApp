@@ -28,7 +28,7 @@ function SignInPage() {
 
   // Code to verify if the user is a patient or a patient
   async function verifyPatient(emailAddress){
-    var docCheck = false;
+    var patientCheck = false;
     const patientsRef = ref(database, 'patients');
 
     // Function takes in entered email address, before checking it against all users in the patients database
@@ -38,13 +38,13 @@ function SignInPage() {
 
         // Check if the email exists in the patients database
         // If exists, return true, if not, return false
-        docCheck = Object.values(patients).some(patient => patient.email === emailAddress);
+        patientCheck = Object.values(patients).some(patient => patient.email === emailAddress);
 
-        return docCheck;
+        return patientCheck;
       })
       .catch(error => {
         console.error('Error verifying patient:', error);
-        return docCheck;
+        return patientCheck;
       });
     }
   
@@ -84,7 +84,7 @@ function SignInPage() {
         setErrorMessage('Please enter a valid email');
       }
       else{
-        // If user email is not found in the doctor database, give error message
+        // If user email is not found in the patient database, give error message
         setErrorMessage('This user is not a patient, doctors please use the web app');
       }
     }
