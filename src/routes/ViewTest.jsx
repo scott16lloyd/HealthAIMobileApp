@@ -172,7 +172,6 @@ function ViewTest() {
           <CardSubtitle variant="subtitle1">Colon Cancer</CardSubtitle>
         </StyledResultCard>
 
-        {/* Explanation Section */}
         <ExplanationSection>
           <Typography variant="h6" gutterBottom>
             Test Result Explanations

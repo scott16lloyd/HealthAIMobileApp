@@ -35,7 +35,7 @@ function MainPage() {
         .then((snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.val();
-            setTestHistory(Object.entries(data)); 
+            setTestHistory(Object.entries(data)); // Changed to entries to get the date keys
           }
         })
         .catch((error) => {
@@ -57,7 +57,12 @@ function MainPage() {
 
   const PrimaryButton = ({ text, action, state }) => {
     return (
-      <button onClick={action} disabled={state !== 'active'}>
+      <button
+        variant="contained" 
+        color="primary" 
+        onClick={action}
+        disabled={state !== 'active'}
+      >
         {text}
       </button>
     );
