@@ -45,7 +45,7 @@ function MainPage() {
         .then((snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.val();
-            setTestHistory(Object.entries(data)); 
+            setTestHistory(Object.entries(data));
           }
         })
         .catch((error) => {
@@ -54,25 +54,8 @@ function MainPage() {
     }
   }, [user]);
 
-  const handleJournalClick = () => {
-    navigate('/diary');
-  };
-
   const handleTestHistoryClick = (testDate) => {
     navigate(`/viewTest/${testDate}`);
-  };
-
-  const PrimaryButton = ({ text, action, state }) => {
-    return (
-      <button
-        variant="contained"
-        color="primary"
-        onClick={action}
-        disabled={state !== 'active'}
-      >
-        {text}
-      </button>
-    );
   };
 
   const iconStyles = {
@@ -195,7 +178,7 @@ function MainPage() {
             <Box display="flex" justifyContent="center" mt={3}>
               <PrimaryButton
                 text="Health Journal"
-                action={handleJournalClick}
+                to={'/diary'}
                 state="active"
               />
             </Box>
