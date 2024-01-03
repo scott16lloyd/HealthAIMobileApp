@@ -7,6 +7,8 @@ import random
 import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from google.cloud import secretmanager
+import json
 
 # Import your prediction modules
 import Colon
@@ -21,11 +23,24 @@ np.random.seed(random_seed)
 
 GENDER_MAPPING = {"M": 0, "F": 1}
 
+def access_secret_version(project_id, secret_id, version_id="latest"):
+    client = secretmanager.SecretManagerServiceClient()
+    name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
+    response = client.access_secret_version(request={"name": name})
+    payload = response.payload.data.decode("UTF-8")
+    return payload
+
+def get_firebase_credentials():
+    project_id = "healthai-40b47"  # Replace with your GCP project ID
+    secret_id = "healthai-40b47-firebase-adminsdk-6kz46-81ac2aa293"
+    
+    secret_payload = access_secret_version(project_id, secret_id)
+    credentials_dict = json.loads(secret_payload)
+    return credentials.Certificate(credentials_dict)
+
 # Initialize Firebase
-script_dir = os.path.dirname(os.path.abspath(__file__))
-firebase_cred_path = os.path.join(script_dir, "healthai-40b47-firebase-adminsdk-6kz46-81ac2aa293.json")
-cred = credentials.Certificate(firebase_cred_path)
-firebase_admin.initialize_app(cred, {
+firebase_credentials = get_firebase_credentials()
+firebase_admin.initialize_app(firebase_credentials, {
     "databaseURL": "https://healthai-40b47-default-rtdb.europe-west1.firebasedatabase.app"
 })
 
@@ -216,4 +231,5 @@ def predict():
     return jsonify(predict_info)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+   port = int(os.environ.get('PORT', 8080))
+   app.run(debug=True, host='0.0.0.0', port=port)

@@ -142,16 +142,18 @@ function MainPage() {
       const medicalRecordsRef = ref(database, `patients/${user.uid}/medicalRecords/${formattedDate}`);
       await set(medicalRecordsRef, answersToSave);
   
-      axios.post('http://localhost:5000/predict', { user_uuid: user.uid })
+      axios.post('https://predict-app-tmzbdquo3q-lz.a.run.app/predict', { user_uuid: user.uid })
         .then(response => {
           setErrorMessage('Questionnaire submitted successfully and prediction initiated!');
           setSeverity('success');
+          setAnswers({}); // Reset answers here
         })
         .catch(error => {
           console.error('Prediction API call failed:', error);
           setErrorMessage('Prediction API call failed. Please try again.');
           setSeverity('error');
         });
+
     } catch (error) {
       console.error('Failed to submit test results:', error);
       setErrorMessage('Failed to submit test results. Please try again.');
