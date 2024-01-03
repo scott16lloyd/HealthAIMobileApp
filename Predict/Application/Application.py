@@ -164,7 +164,7 @@ def generate_single_patient_data(model_type, patient_data, age, sex):
 
 def add_predict_info_to_firebase(predict_info, uid):
     current_date = datetime.datetime.now().strftime("%d-%m-%Y")
-    patients_ref = db.reference(f'patients/{uid}/testResults/{current_date}')
+    patients_ref = db.reference(f'patients/{uid}/testHistory/{current_date}')
     patients_ref.update(predict_info)
 
 
